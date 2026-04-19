@@ -4,898 +4,926 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>АМАНАТ — Кыргыз Маданий Аманаты</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --gold:#D4A843;--gold2:#B8892A;--gold3:#8A6010;
-  --red-ethno:#8B1A1A;--red2:#6B1010;
-  --bg:#0D0B07;--card:#181208;--card2:#1E1608;--border:#2E2208;--border2:#3A2E10;
+  --bg:#0D0B07;--card:#181208;--card2:#1E1608;--border2:#3A2E10;
   --text:#F0DEB8;--text2:#C8A86A;--text3:#7A6A3A;--text4:#4A3A1A;
-  --red:#C0392B;--green:#1E7A3A;--blue:#1A5080;
   --shadow:rgba(0,0,0,0.5);
+  --badge-bg:#3A2E10;--badge-text:#D4A843;
+  --xp-bg:#3A2E10;--xp-text:#D4A843;
+  --progress-bg:#2A2010;
+  --quest-border:#8A6010;
+  --chip-bg:#1E1608;--chip-text:#C8A86A;
+  --del-bg:#5A1A1A;--del-text:#C8A86A;
+  --input-bg:#0D0B07;
 }
 .light{
-  --bg:#F5EDD8;--card:#FFFBF0;--card2:#FFF8E8;--border:#E0C878;--border2:#C8A845;
-  --text:#2A1800;--text2:#5A3C10;--text3:#8A6828;--text4:#C8A845;
+  --bg:#F5EDD8;--card:#FFFBF0;--card2:#FFF0D0;--border2:#C8A845;
+  --text:#2A1800;--text2:#5A3C10;--text3:#7A5820;--text4:#C8A845;
   --shadow:rgba(0,0,0,0.15);
+  --badge-bg:#8B1A1A;--badge-text:#FFF8E8;
+  --xp-bg:#8B1A1A;--xp-text:#FFF8E8;
+  --progress-bg:#D4C090;
+  --quest-border:#B8892A;
+  --chip-bg:#F0E0B0;--chip-text:#5A3C10;
+  --del-bg:#F0D0B0;--del-text:#8B1A1A;
+  --input-bg:#FFF8E8;
 }
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);display:flex;justify-content:center;min-height:100vh;transition:background 0.3s}
-.app{width:100%;max-width:440px;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;position:relative;transition:background 0.3s}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);display:flex;justify-content:center;min-height:100vh}
+.app{width:100%;max-width:440px;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;position:relative}
 @media(min-width:900px){.app{border-left:1px solid var(--border2);border-right:1px solid var(--border2);box-shadow:0 0 40px var(--shadow)}}
-.topbar{background:var(--card);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:20}
-.logo{display:flex;align-items:center;gap:8px}
-.logo-box{width:32px;height:32px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#0D0B07}
-.logo-text{font-size:16px;font-weight:800;letter-spacing:4px;color:var(--gold)}
-.top-controls{display:flex;gap:6px;align-items:center}
-.top-btn{background:var(--border2);border:none;border-radius:16px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-weight:700;transition:all 0.2s;font-family:inherit}
-.top-btn:hover,.top-btn.active-lang{background:var(--gold);color:#0D0B07}
-.theme-btn{background:var(--border2);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-.theme-btn:hover{background:var(--gold)}
-.content{flex:1;overflow-y:auto;padding:14px;display:none;padding-bottom:80px}
-#home{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='55' fill='none' stroke='%238B1A1A' stroke-width='1.5' opacity='0.08'/%3E%3Ccircle cx='60' cy='60' r='40' fill='none' stroke='%23D4A843' stroke-width='0.8' opacity='0.06'/%3E%3Ccircle cx='60' cy='60' r='25' fill='none' stroke='%238B1A1A' stroke-width='0.8' opacity='0.06'/%3E%3Cpath d='M60 5 Q65 30 60 35 Q55 30 60 5Z' fill='%23D4A843' opacity='0.05'/%3E%3Cpath d='M60 115 Q65 90 60 85 Q55 90 60 115Z' fill='%23D4A843' opacity='0.05'/%3E%3Cpath d='M5 60 Q30 65 35 60 Q30 55 5 60Z' fill='%23D4A843' opacity='0.05'/%3E%3Cpath d='M115 60 Q90 65 85 60 Q90 55 115 60Z' fill='%23D4A843' opacity='0.05'/%3E%3C/svg%3E");background-repeat:repeat;background-size:120px 120px}
+.content{flex:1;overflow-y:auto;padding:14px;display:none;padding-bottom:85px}
 .content.active{display:block}
-.bottombar{background:var(--card);border-top:2px solid #8B1A1A;display:flex;padding:6px 0 2px;position:sticky;bottom:0;z-index:20;box-shadow:0 -1px 0 #D4A843 inset}
+.bottombar{background:var(--card);border-top:2px solid #8B1A1A;display:flex;padding:6px 0 2px;position:sticky;bottom:0;z-index:20}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 2px;border:none;background:none;color:var(--text3);font-size:9px;font-family:inherit;transition:color 0.2s}
 .nav-item.active{color:var(--gold)}
 .nav-icon{font-size:18px}
-.card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:8px;transition:background 0.3s,border 0.3s}
+.card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:8px;position:relative}
 .card-gold{border-color:var(--gold2);border-top:2px solid #8B1A1A}
 .card-interactive{cursor:pointer;transition:all 0.2s}
 .card-interactive:hover{border-color:var(--gold);transform:translateY(-1px)}
 .gold{color:var(--gold)}
 .text2{color:var(--text2)}
 .text3{color:var(--text3)}
-.badge{background:var(--border2);border-radius:16px;padding:2px 8px;font-size:10px;color:var(--gold);display:inline-block}
-.badge-green{background:#0A3015;color:#4AE07A}
-.light .badge-green{background:#D0F0DA;color:#0A5020}
-.progress-bar{background:var(--border2);border-radius:3px;height:5px;margin-top:5px;overflow:hidden}
-.progress-fill{background:var(--gold);height:100%;border-radius:3px;transition:width 0.5s}
-.chip{background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:5px 12px;font-size:11px;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.2s}
+.badge{background:var(--badge-bg);border-radius:16px;padding:2px 9px;font-size:10px;color:var(--badge-text);display:inline-block;font-weight:600}
+.progress-bar{background:var(--progress-bg);border-radius:4px;height:7px;margin-top:6px;overflow:hidden}
+.progress-fill{background:linear-gradient(90deg,#B8892A,#D4A843,#F0C060);height:100%;border-radius:4px;transition:width 0.6s ease}
+.chip{background:var(--chip-bg);border:1px solid var(--border2);border-radius:16px;padding:5px 12px;font-size:11px;color:var(--chip-text);cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.2s}
 .chip:hover{border-color:var(--gold)}
 .chip.active{background:var(--gold);color:#0D0B07;font-weight:700;border-color:var(--gold)}
 .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:4px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.place-card,.person-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s}
-.place-card:hover,.person-card:hover{border-color:var(--gold);transform:translateY(-1px)}
-.place-icon{width:46px;height:46px;background:var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.avatar{width:46px;height:46px;background:var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--gold);flex-shrink:0;border:1px solid var(--gold2)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:6px}
-.cal-head{text-align:center;font-size:10px;font-weight:700;color:var(--gold2);padding:5px 1px}
-.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text);transition:background 0.15s}
-.cal-day:hover{background:var(--border2)}
-.cal-day.today{background:var(--gold);color:#0D0B07;font-weight:700}
-.cal-day.holiday{color:var(--gold);font-weight:700}
-.cal-day.weekend{color:var(--text2)}
-.cal-day.other{color:var(--text4)}
-.muchol-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
-.animal-cell{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s}
-.animal-cell:hover{border-color:var(--gold2)}
-.animal-cell.current{border-color:var(--gold);background:var(--card2)}
-.animal-cell.selected{border-color:var(--gold);background:var(--card2);box-shadow:0 0 0 2px var(--gold3)}
-.animal-emoji{font-size:24px}
-.animal-name{font-size:10px;color:var(--text2);margin-top:3px}
-.animal-year{font-size:9px;color:var(--gold);font-weight:700}
-.quest-card{background:var(--card);border:1px solid var(--gold3);border-radius:10px;padding:12px;margin-bottom:6px}
+.quest-card{background:var(--card);border:1px solid var(--quest-border);border-radius:10px;padding:10px 12px;margin-bottom:6px}
 .quest-row{display:flex;align-items:center;gap:8px}
-.quest-check{width:20px;height:20px;border:2px solid var(--border2);border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;background:transparent;transition:all 0.2s}
+.quest-check{width:22px;height:22px;border:2px solid var(--border2);border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;background:transparent;transition:all 0.2s}
 .quest-check.done{background:var(--gold);border-color:var(--gold);color:#0D0B07}
-.xp-badge{margin-left:auto;background:var(--border2);border-radius:8px;padding:2px 8px;font-size:10px;color:var(--gold);white-space:nowrap;font-weight:700}
+.xp-badge{background:var(--xp-bg);border-radius:8px;padding:2px 8px;font-size:10px;color:var(--xp-text);white-space:nowrap;font-weight:700}
+.del-btn{background:var(--del-bg);border:none;border-radius:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--del-text);font-size:14px;flex-shrink:0;transition:all 0.2s;line-height:1;font-family:inherit}
+.del-btn:hover{background:#8B1A1A;color:#fff}
 .btn-gold{background:var(--gold);color:#0D0B07;border:none;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-top:8px;font-family:inherit;transition:background 0.2s}
 .btn-gold:hover{background:var(--gold2)}
 .btn-outline{background:var(--card);color:var(--gold);border:1px solid var(--border2);border-radius:10px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;width:100%;margin-top:6px;font-family:inherit;transition:all 0.2s}
 .btn-outline:hover{border-color:var(--gold)}
-.month-nav{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:10px 12px;margin-bottom:10px}
-.month-arrow{background:none;border:none;color:var(--gold);font-size:22px;cursor:pointer;padding:0 6px;line-height:1;font-family:inherit}
-.back-btn{background:var(--border2);border:none;color:var(--gold);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:12px;margin-bottom:10px;font-family:inherit;display:inline-block;transition:background 0.2s}
+.back-btn{background:var(--border2);border:none;color:var(--gold);border-radius:8px;padding:5px 14px;cursor:pointer;font-size:12px;margin-bottom:10px;font-family:inherit;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s}
 .back-btn:hover{background:var(--gold);color:#0D0B07}
-.year-input{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;width:100%;margin-top:8px;outline:none;font-family:inherit;transition:border 0.2s}
+.year-input{background:var(--input-bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;width:100%;margin-top:8px;outline:none;font-family:inherit;transition:border 0.2s}
 .year-input:focus{border-color:var(--gold)}
-.find-btn{background:var(--gold);color:#0D0B07;border:none;border-radius:8px;padding:8px 18px;font-weight:700;cursor:pointer;margin-top:8px;font-size:13px;font-family:inherit;transition:background 0.2s}
-.find-btn:hover{background:var(--gold2)}
+.find-btn{background:var(--gold);color:#0D0B07;border:none;border-radius:8px;padding:8px 18px;font-weight:700;cursor:pointer;margin-top:8px;font-size:13px;font-family:inherit}
 .result-box{background:var(--card2);border:1px solid var(--gold);border-radius:10px;padding:14px;margin-top:10px;display:none;text-align:center}
 .section-label{font-size:9px;letter-spacing:3px;font-weight:700;color:var(--gold2);margin-bottom:8px;margin-top:14px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
 .section-label::before,.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,#8B1A1A,transparent)}
 .ethno-divider{width:100%;height:16px;margin:4px 0;display:flex;align-items:center;justify-content:center;gap:6px;opacity:0.7}
 .ethno-divider::before,.ethno-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,#8B1A1A 30%,#D4A843 50%,#8B1A1A 70%,transparent)}
 .ethno-divider span{color:#8B1A1A;font-size:10px;letter-spacing:3px}
-.card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:8px;transition:background 0.3s,border 0.3s;position:relative}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#8B1A1A 40%,#8B1A1A 60%,transparent);border-radius:12px 12px 0 0;opacity:0}
-.card-gold::before{opacity:0.5}
-.bottombar-ornament{width:100%;height:3px;background:linear-gradient(90deg,transparent,#8B1A1A 20%,#D4A843 50%,#8B1A1A 80%,transparent)}
 .detail-box{background:var(--card);border:1px solid var(--gold2);border-radius:12px;padding:14px;margin-top:10px}
-.map-frame{width:100%;border-radius:12px;border:1px solid var(--border2);height:260px;background:var(--card2);display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden;position:relative}
-.map-placeholder{text-align:center;padding:20px}
-.holiday-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;display:inline-block;margin-left:2px;vertical-align:middle}
-.stat-row{display:flex;gap:8px;margin-bottom:8px}
-.stat-card{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;text-align:center}
 .fact-card{background:var(--card2);border-left:3px solid #8B1A1A;border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:6px}
-.quote-card{background:var(--card);border:1px solid #5A1A1A;border-top:2px solid #8B1A1A;border-radius:10px;padding:12px;margin-bottom:6px;position:relative}
-.quote-card::before{content:'"';font-size:40px;color:var(--gold3);position:absolute;top:-5px;left:8px;line-height:1;font-family:serif}
+.quote-card{background:var(--card);border:1px solid #5A1A1A;border-top:2px solid #8B1A1A;border-radius:10px;padding:14px 12px 12px 28px;margin-bottom:6px;position:relative;font-style:italic}
+.quote-card::before{content:'"';font-size:42px;color:var(--gold3);position:absolute;top:-6px;left:6px;line-height:1;font-family:serif}
 .search-bar{background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:8px 12px;color:var(--text);font-size:13px;width:100%;outline:none;font-family:inherit;margin-bottom:10px;transition:border 0.2s}
 .search-bar:focus{border-color:var(--gold)}
-.loading{text-align:center;color:var(--text3);padding:20px;font-size:13px}
-.ornament{text-align:center;color:var(--gold3);font-size:18px;letter-spacing:8px;margin:8px 0}
 .streak-badge{background:linear-gradient(135deg,var(--gold3),var(--gold));border-radius:20px;padding:4px 12px;font-size:11px;color:#0D0B07;font-weight:700;display:inline-flex;align-items:center;gap:4px}
-.region-map{width:100%;margin-bottom:12px}
-.tooltip{position:absolute;background:var(--card);border:1px solid var(--gold);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--text);pointer-events:none;z-index:100;white-space:nowrap;display:none}
+.much-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.animal-cell{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s}
+.animal-cell:hover{border-color:var(--gold2)}
+.animal-cell.current{border-color:var(--gold);background:var(--card2)}
+.animal-cell.selected{border-color:var(--gold);background:var(--card2);box-shadow:0 0 0 2px var(--gold3)}
+.month-nav{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.month-arrow{background:none;border:none;color:var(--gold);font-size:26px;cursor:pointer;padding:0 8px;line-height:1;font-family:inherit}
+.stat-row{display:flex;gap:8px;margin-bottom:8px}
+.stat-card{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px;text-align:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:6px}
+.cal-head{text-align:center;font-size:10px;font-weight:700;color:var(--gold2);padding:5px 1px}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:12px;cursor:pointer;color:var(--text);transition:all 0.15s;position:relative}
+.cal-day:hover{background:var(--border2)}
+.cal-day.today{background:var(--gold);color:#0D0B07;font-weight:700}
+.cal-day.holiday{color:var(--gold);font-weight:700}
+.cal-day.weekend{color:#C8A86A}
+.cal-day.other{color:var(--text4);opacity:0.4}
+.hol-dot{width:4px;height:4px;background:var(--gold);border-radius:50%;position:absolute;bottom:3px}
+.cal-day.today .hol-dot{background:#0D0B07}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.78);z-index:300;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--gold2);border-top:3px solid #8B1A1A;border-radius:16px;padding:20px;max-width:360px;width:100%;max-height:82vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:10px;right:10px;background:var(--border2);border:none;color:var(--gold);border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+#leaflet-map{width:100%;height:300px;border-radius:12px;border:1px solid var(--border2);margin-bottom:12px;z-index:1}
+.place-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;overflow:hidden}
+.place-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.place-thumb{width:100%;height:130px;position:relative;background:var(--border2);overflow:hidden}
+.place-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.place-body{padding:10px 12px}
+.person-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s}
+.person-card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.avatar{width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--gold2);background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--gold)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.trad-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.trad-header{display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer;transition:background 0.2s}
+.trad-header:hover{background:var(--card2)}
+.trad-body{padding:0 12px 12px;display:none;border-top:1px solid var(--border2)}
+.trad-body.open{display:block}
+.trad-info-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.xp-toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--gold);color:#0D0B07;border-radius:20px;padding:8px 20px;font-size:13px;font-weight:700;opacity:0;transition:all 0.35s;pointer-events:none;z-index:400;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+.xp-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.top-btn{background:var(--border2);border:none;border-radius:16px;padding:4px 10px;color:var(--gold);font-size:11px;cursor:pointer;font-weight:700;transition:all 0.2s;font-family:inherit}
+.top-btn:hover,.top-btn.active-lang{background:var(--gold);color:#0D0B07}
+.theme-btn{background:var(--border2);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.theme-btn:hover{background:var(--gold)}
+.light .fact-card{background:#FFF0D0}
+.light .quote-card{background:#FFF8E8;border-color:#D4A843}
+.light .search-bar,.light .year-input{background:#FFF0D0;color:#2A1800}
+.light .stat-card{background:#FFF0D0}
+.light .result-box{background:#FFF0D0}
+.light .detail-box{background:#FFFBF0}
+.light .modal-box{background:#FFFBF0}
+.light .trad-card{background:#FFFBF0}
+.light .trad-body{border-color:#E0C878}
+.light .cal-day{color:#2A1800}
+.light .cal-day.weekend{color:#8B1A1A}
+.light .cal-day.other{color:#C8A845}
+.light .animal-cell{background:#FFFBF0}
+.light .animal-cell.current,.light .animal-cell.selected{background:#FFF0D0}
+.howto-box{background:var(--card2);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:10px 12px;margin-top:6px}
+
+/* PLACE DETAIL IMAGE */
+.place-detail-img{width:100%;height:220px;object-fit:cover;display:block;border-radius:0}
+.place-detail-hero{border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:10px;position:relative}
+.place-detail-hero-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(13,11,7,0.92) 0%,rgba(13,11,7,0.1) 70%);padding:14px}
 </style>
 </head>
 <body>
 <div class="app" id="app">
-  <div class="topbar" style="padding:0;flex-direction:column;gap:0;border-bottom:none">
-    <svg viewBox="0 0 440 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;height:60px;flex-shrink:0">
-      <defs>
-        <pattern id="bgp" x="0" y="0" width="36" height="36" patternUnits="userSpaceOnUse">
-          <rect width="36" height="36" fill="#0D0B07"/>
-          <path d="M18 3 Q21 7 18 11 Q15 7 18 3Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
-          <path d="M18 25 Q21 29 18 33 Q15 29 18 25Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
-          <path d="M3 18 Q7 21 11 18 Q7 15 3 18Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
-          <path d="M25 18 Q29 21 33 18 Q29 15 25 18Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
-        </pattern>
-      </defs>
-      <rect width="440" height="60" fill="url(#bgp)"/>
-      <rect width="440" height="60" fill="#0D0B07" opacity="0.55"/>
-      <rect x="0" y="0" width="440" height="3.5" fill="#8B1A1A"/>
-      <rect x="0" y="56.5" width="440" height="3.5" fill="#8B1A1A"/>
-      <rect x="0" y="3.5" width="440" height="1.2" fill="#D4A843" opacity="0.65"/>
-      <rect x="0" y="55.3" width="440" height="1.2" fill="#D4A843" opacity="0.65"/>
-      <g transform="translate(24,30)">
-        <circle cx="0" cy="0" r="12" fill="none" stroke="#8B1A1A" stroke-width="2"/>
-        <circle cx="0" cy="0" r="8" fill="none" stroke="#D4A843" stroke-width="0.7" opacity="0.5"/>
-        <path d="M0-12 Q3.5-6.5 0-2 Q-3.5-6.5 0-12Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M0 12 Q3.5 6.5 0 2 Q-3.5 6.5 0 12Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M-12 0 Q-6.5-3.5 -2 0 Q-6.5 3.5-12 0Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M12 0 Q6.5-3.5 2 0 Q6.5 3.5 12 0Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M-8.5-8.5 Q-5-4.5 -2-2 Q-4.5-5 -8.5-8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <path d="M8.5-8.5 Q5-4.5 2-2 Q4.5-5 8.5-8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <path d="M-8.5 8.5 Q-5 4.5 -2 2 Q-4.5 5-8.5 8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <path d="M8.5 8.5 Q5 4.5 2 2 Q4.5 5 8.5 8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <circle cx="0" cy="0" r="2.5" fill="#D4A843"/>
-      </g>
-      <path d="M44 30 Q50 26 56 30 Q50 34 44 30Z" fill="#8B1A1A" opacity="0.8"/>
-      <path d="M58 30 Q65 25 72 30 Q65 35 58 30Z" fill="#8B1A1A" opacity="0.7"/>
-      <path d="M74 30 Q79 27 84 30 Q79 33 74 30Z" fill="#8B1A1A" opacity="0.6"/>
-      <line x1="44" y1="30" x2="86" y2="30" stroke="#D4A843" stroke-width="0.5" opacity="0.3"/>
-      <text x="220" y="27" text-anchor="middle" font-family="Georgia,serif" font-size="19" font-weight="bold" fill="#D4A843" letter-spacing="9">АМАНАТ</text>
-      <text x="220" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="7.5" fill="#8A6010" letter-spacing="3.5">КЫРГЫЗ МАДАНИЙ АМАНАТЫ</text>
-      <path d="M396 30 Q391 26 386 30 Q391 34 396 30Z" fill="#8B1A1A" opacity="0.8"/>
-      <path d="M382 30 Q375 25 368 30 Q375 35 382 30Z" fill="#8B1A1A" opacity="0.7"/>
-      <path d="M366 30 Q361 27 356 30 Q361 33 366 30Z" fill="#8B1A1A" opacity="0.6"/>
-      <line x1="354" y1="30" x2="396" y2="30" stroke="#D4A843" stroke-width="0.5" opacity="0.3"/>
-      <g transform="translate(416,30)">
-        <circle cx="0" cy="0" r="12" fill="none" stroke="#8B1A1A" stroke-width="2"/>
-        <circle cx="0" cy="0" r="8" fill="none" stroke="#D4A843" stroke-width="0.7" opacity="0.5"/>
-        <path d="M0-12 Q3.5-6.5 0-2 Q-3.5-6.5 0-12Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M0 12 Q3.5 6.5 0 2 Q-3.5 6.5 0 12Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M-12 0 Q-6.5-3.5 -2 0 Q-6.5 3.5-12 0Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M12 0 Q6.5-3.5 2 0 Q6.5 3.5 12 0Z" fill="#D4A843" opacity="0.85"/>
-        <path d="M-8.5-8.5 Q-5-4.5 -2-2 Q-4.5-5 -8.5-8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <path d="M8.5-8.5 Q5-4.5 2-2 Q4.5-5 8.5-8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <path d="M-8.5 8.5 Q-5 4.5 -2 2 Q-4.5 5-8.5 8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <path d="M8.5 8.5 Q5 4.5 2 2 Q4.5 5 8.5 8.5Z" fill="#8B1A1A" opacity="0.9"/>
-        <circle cx="0" cy="0" r="2.5" fill="#D4A843"/>
-      </g>
-    </svg>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 12px 5px;background:#181208;border-bottom:1px solid #5A1A1A;border-top:none">
-      <div style="display:flex;gap:5px">
-        <button class="top-btn active-lang" onclick="setLang('ky',this)" id="btn-ky">КЫ</button>
-        <button class="top-btn" onclick="setLang('ru',this)" id="btn-ru">РУ</button>
-        <button class="top-btn" onclick="setLang('en',this)" id="btn-en">EN</button>
-      </div>
-      <div style="font-size:11px;color:#8B1A1A;letter-spacing:4px">✦ ✦ ✦</div>
-      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Тема">🌙</button>
+
+<!-- HEADER -->
+<div style="position:sticky;top:0;z-index:20;background:var(--card)">
+  <svg viewBox="0 0 440 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;height:60px;flex-shrink:0">
+    <defs>
+      <pattern id="bgp" x="0" y="0" width="36" height="36" patternUnits="userSpaceOnUse">
+        <rect width="36" height="36" fill="#0D0B07"/>
+        <path d="M18 3 Q21 7 18 11 Q15 7 18 3Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
+        <path d="M18 25 Q21 29 18 33 Q15 29 18 25Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
+        <path d="M3 18 Q7 21 11 18 Q7 15 3 18Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
+        <path d="M25 18 Q29 21 33 18 Q29 15 25 18Z" fill="#1E0A00" stroke="#3A2208" stroke-width="0.4"/>
+      </pattern>
+    </defs>
+    <rect width="440" height="60" fill="url(#bgp)"/>
+    <rect width="440" height="60" fill="#0D0B07" opacity="0.55"/>
+    <rect x="0" y="0" width="440" height="3.5" fill="#8B1A1A"/>
+    <rect x="0" y="56.5" width="440" height="3.5" fill="#8B1A1A"/>
+    <rect x="0" y="3.5" width="440" height="1.2" fill="#D4A843" opacity="0.65"/>
+    <rect x="0" y="55.3" width="440" height="1.2" fill="#D4A843" opacity="0.65"/>
+    <g transform="translate(24,30)">
+      <circle cx="0" cy="0" r="12" fill="none" stroke="#8B1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="8" fill="none" stroke="#D4A843" stroke-width="0.7" opacity="0.5"/>
+      <path d="M0-12 Q3.5-6.5 0-2 Q-3.5-6.5 0-12Z" fill="#D4A843" opacity="0.85"/>
+      <path d="M0 12 Q3.5 6.5 0 2 Q-3.5 6.5 0 12Z" fill="#D4A843" opacity="0.85"/>
+      <path d="M-12 0 Q-6.5-3.5 -2 0 Q-6.5 3.5-12 0Z" fill="#D4A843" opacity="0.85"/>
+      <path d="M12 0 Q6.5-3.5 2 0 Q6.5 3.5 12 0Z" fill="#D4A843" opacity="0.85"/>
+      <circle cx="0" cy="0" r="2.5" fill="#D4A843"/>
+    </g>
+    <path d="M44 30 Q50 26 56 30 Q50 34 44 30Z" fill="#8B1A1A" opacity="0.8"/>
+    <path d="M58 30 Q65 25 72 30 Q65 35 58 30Z" fill="#8B1A1A" opacity="0.7"/>
+    <path d="M74 30 Q79 27 84 30 Q79 33 74 30Z" fill="#8B1A1A" opacity="0.6"/>
+    <text x="220" y="27" text-anchor="middle" font-family="Georgia,serif" font-size="19" font-weight="bold" fill="#D4A843" letter-spacing="9">АМАНАТ</text>
+    <text x="220" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="7.5" fill="#8A6010" letter-spacing="3.5">КЫРГЫЗ МАДАНИЙ АМАНАТЫ</text>
+    <path d="M396 30 Q391 26 386 30 Q391 34 396 30Z" fill="#8B1A1A" opacity="0.8"/>
+    <path d="M382 30 Q375 25 368 30 Q375 35 382 30Z" fill="#8B1A1A" opacity="0.7"/>
+    <path d="M366 30 Q361 27 356 30 Q361 33 366 30Z" fill="#8B1A1A" opacity="0.6"/>
+    <g transform="translate(416,30)">
+      <circle cx="0" cy="0" r="12" fill="none" stroke="#8B1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="8" fill="none" stroke="#D4A843" stroke-width="0.7" opacity="0.5"/>
+      <path d="M0-12 Q3.5-6.5 0-2 Q-3.5-6.5 0-12Z" fill="#D4A843" opacity="0.85"/>
+      <path d="M0 12 Q3.5 6.5 0 2 Q-3.5 6.5 0 12Z" fill="#D4A843" opacity="0.85"/>
+      <path d="M-12 0 Q-6.5-3.5 -2 0 Q-6.5 3.5-12 0Z" fill="#D4A843" opacity="0.85"/>
+      <path d="M12 0 Q6.5-3.5 2 0 Q6.5 3.5 12 0Z" fill="#D4A843" opacity="0.85"/>
+      <circle cx="0" cy="0" r="2.5" fill="#D4A843"/>
+    </g>
+  </svg>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 12px;background:#181208;border-bottom:1px solid #5A1A1A">
+    <div style="display:flex;gap:5px">
+      <button class="top-btn active-lang" onclick="setLang('ky',this)">КЫ</button>
+      <button class="top-btn" onclick="setLang('ru',this)">РУ</button>
+      <button class="top-btn" onclick="setLang('en',this)">EN</button>
     </div>
-  </div>
-
-  <!-- HOME -->
-  <div id="home" class="content active">
-    <div class="card card-gold" style="display:flex;align-items:center;gap:12px">
-      <div style="font-size:36px">🏆</div>
-      <div style="flex:1">
-        <div class="gold" style="font-size:15px;font-weight:700" data-t="rank_title">Жаш Манасчы</div>
-        <div class="text2" style="font-size:11px" data-t="rank_level">Деңгээл 12 · 3450 XP</div>
-        <div class="progress-bar"><div class="progress-fill" id="xp-bar" style="width:69%"></div></div>
-        <div style="display:flex;justify-content:space-between;margin-top:3px">
-          <span style="font-size:10px;color:var(--text3)">3450 XP</span>
-          <span style="font-size:10px;color:var(--text3)">5000 XP</span>
-        </div>
-      </div>
-      <div><span class="streak-badge">🔥 7</span></div>
-    </div>
-
-    <div class="ethno-divider"><span>✦ ✦ ✦</span></div>
-    <div class="section-label" data-t="daily_quests">КҮНДҮК ТАПШЫРМАЛАР</div>
-    <div id="quests-container"></div>
-    <button class="btn-outline" onclick="addRandomQuest()" data-t="add_quest">+ Тапшырма кошуу</button>
-
-    <div class="ethno-divider"><span>✦ ✦ ✦</span></div>
-    <div class="section-label" data-t="year_of">2026 — ЖЫЛКЫ ЖЫЛЫ</div>
-    <div class="card" style="display:flex;gap:12px;align-items:center">
-      <div style="font-size:42px">🐎</div>
-      <div>
-        <div class="gold" style="font-weight:700;font-size:15px" data-t="horse_year">Жылкы жылы</div>
-        <div class="text2" style="font-size:11px">год Лошади · 2026</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5" data-t="horse_desc">Эркиндик, энергия жана ийгилик жылы. Чечкиндүү кадамдар үчүн колайлуу убакыт.</div>
-        <div style="display:flex;gap:4px;margin-top:6px"><span class="badge" data-t="tr_free">Эркин</span><span class="badge" data-t="tr_energy">Энергиялуу</span><span class="badge" data-t="tr_brave">Баатыр</span></div>
-      </div>
-    </div>
-
-    <div class="ethno-divider"><span>✦ ✦ ✦</span></div>
-    <div class="section-label" data-t="todays_calendar">БҮГҮНКү АЙ-КҮН</div>
-    <div class="card" id="today-card" style="cursor:pointer" onclick="goTo('calendar',null,2)"></div>
-
-    <div class="section-label" data-t="did_you_know">БИЛДИҢИЗБИ?</div>
-    <div id="fact-home" class="fact-card"></div>
-    <button class="btn-outline" onclick="rotateFact()" data-t="next_fact">↻ Дагы бир факт</button>
-
-    <div class="section-label" data-t="famous">ДАҢКТУУЛАР</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="home-persons"></div>
-  </div>
-
-  <!-- MAP -->
-  <div id="map" class="content">
-    <div class="section-label" style="margin-top:0" data-t="sacred_places">САКРАЛДЫК ЖЕРЛЕР</div>
-    <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="sacred_title">Ыйык жерлер</div>
-    <div class="text2" style="font-size:12px;margin-bottom:10px" data-t="sacred_sub">Кыргызстандын сакралдык жана тарыхый жерлери</div>
-
-    <div class="map-frame" id="map-frame">
-      <div class="map-placeholder">
-        <div style="font-size:32px">🗺</div>
-        <div class="text2" style="font-size:12px;margin-top:6px" data-t="map_open">Картаны ачуу</div>
-        <button class="btn-gold" style="margin-top:10px;width:auto;padding:8px 18px" onclick="openMap()" data-t="open_map_btn">OpenStreetMap</button>
-      </div>
-    </div>
-
-    <div class="chips" id="region-chips">
-      <button class="chip active" onclick="filterRegion(this,'all')" data-t="all">Баары</button>
-      <button class="chip" onclick="filterRegion(this,'Ош')">Ош</button>
-      <button class="chip" onclick="filterRegion(this,'Ысык-Көл')">Ысык-Көл</button>
-      <button class="chip" onclick="filterRegion(this,'Талас')">Талас</button>
-      <button class="chip" onclick="filterRegion(this,'Нарын')">Нарын</button>
-      <button class="chip" onclick="filterRegion(this,'Жалал-Абад')">Жалал-Абад</button>
-      <button class="chip" onclick="filterRegion(this,'Чүй')">Чүй</button>
-      <button class="chip" onclick="filterRegion(this,'Баткен')">Баткен</button>
-    </div>
-    <input class="search-bar" placeholder="🔍 Издөө..." oninput="searchPlaces(this.value)" data-placeholder="search_places">
-    <div id="places-list"></div>
-  </div>
-
-  <!-- CALENDAR -->
-  <div id="calendar" class="content">
-    <div class="month-nav">
-      <button class="month-arrow" onclick="changeMonth(-1)">‹</button>
-      <div style="text-align:center">
-        <div class="gold" style="font-size:16px;font-weight:700" id="month-kg-name">—</div>
-        <div class="text2" style="font-size:12px" id="month-ru-name">—</div>
-        <div class="text3" style="font-size:10px;margin-top:2px" id="month-origin">—</div>
-      </div>
-      <button class="month-arrow" onclick="changeMonth(1)">›</button>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="text3" style="font-size:9px" data-t="holidays_count">Майрамдар</div>
-        <div class="gold" style="font-size:18px;font-weight:700" id="holiday-count">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="text3" style="font-size:9px" data-t="month_num">Айдын №</div>
-        <div class="gold" style="font-size:18px;font-weight:700" id="month-num">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="text3" style="font-size:9px" data-t="days_count">Күн саны</div>
-        <div class="gold" style="font-size:18px;font-weight:700" id="days-count">—</div>
-      </div>
-    </div>
-
-    <div class="card" style="padding:10px">
-      <div class="cal-grid">
-        <div class="cal-head" data-t="mon">Дш</div><div class="cal-head" data-t="tue">Шш</div>
-        <div class="cal-head" data-t="wed">Бш</div><div class="cal-head" data-t="thu">Жм</div>
-        <div class="cal-head" data-t="fri">Иш</div><div class="cal-head" data-t="sat">Жк</div>
-        <div class="cal-head" data-t="sun">Жк</div>
-      </div>
-      <div class="cal-grid" id="cal-days"></div>
-    </div>
-
-    <div id="selected-day-info" style="display:none" class="card card-gold" style="margin-top:8px"></div>
-    <div id="holidays-list" style="margin-top:6px"></div>
-
-    <div class="section-label" data-t="noorus_section">НООРУЗ ЖӨНҮНДӨ</div>
-    <div class="fact-card">
-      <div class="gold" style="font-size:12px;font-weight:700;margin-bottom:4px">🌸 <span data-t="noorus_title">Нооруз майрамы — 21-март</span></div>
-      <div class="text2" style="font-size:11px;line-height:1.6" data-t="noorus_desc">Жазгы теңелиш — Улуу жаңылануу майрамы. Кыргыз элинде 3000 жылдык тарыхы бар. Сумалак, көжө, гранат, дан — столдун 7 символу. Кыргыз, Казак, Өзбек, Иран, Түркия элдери бирге белгилейт. ЮНЕСКО тарабынан дүйнөлүк маданий мурас катары таанылган.</div>
-    </div>
-  </div>
-
-  <!-- MUCHOL -->
-  <div id="muchol" class="content">
-    <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="muchol_title">✨ 12 Мүчөл — Жылдык цикл</div>
-    <div class="text2" style="font-size:11px;margin-bottom:10px" data-t="muchol_sub">Байыркы Кыргыз астрологиясы · 12 жылдык цикл</div>
-
-    <div class="fact-card" style="margin-bottom:10px">
-      <div class="text2" style="font-size:11px;line-height:1.6" data-t="muchol_history">12 мүчөл системасы Орто Азия, Монголия жана Кытай аркылуу тараган. Байыркы Түрк-Моңгол маданиятынан келип чыккан. Кыргызтарда ар бир жылдын өзүнүн энергиясы жана маанайы бар деп эсептелет.</div>
-    </div>
-
-    <div class="card">
-      <div class="gold" style="font-weight:700;margin-bottom:4px;font-size:13px">🔍 <span data-t="find_your_animal">Өзүңдүн жылыңды тап</span></div>
-      <div class="text3" style="font-size:11px" data-t="enter_birth_year">Туулган жылыңды киргиз</div>
-      <input class="year-input" type="number" placeholder="1990" id="birth-year" min="1900" max="2040">
-      <button class="find-btn" onclick="findAnimal()" data-t="find_btn">Табуу →</button>
-      <div class="result-box" id="animal-result"></div>
-    </div>
-    <div class="muchol-grid" id="muchol-grid"></div>
-    <div id="animal-detail"></div>
-  </div>
-
-  <!-- DANKTUU -->
-  <div id="danktuu" class="content">
-    <div class="section-label" style="margin-top:0" data-t="heroes_label">УЛУУ ИНСАНДАР</div>
-    <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="heroes_title">Кыргыз элинин даңктуулары</div>
-    <input class="search-bar" placeholder="🔍 Издөө..." oninput="searchPersons(this.value)" data-placeholder="search_persons">
-    <div class="chips" id="person-chips">
-      <button class="chip active" onclick="filterPersons(this,'all')">Баары</button>
-      <button class="chip" onclick="filterPersons(this,'baatyr')">Баатырлар</button>
-      <button class="chip" onclick="filterPersons(this,'akyn')">Акындар</button>
-      <button class="chip" onclick="filterPersons(this,'politic')">Саясатчылар</button>
-      <button class="chip" onclick="filterPersons(this,'writer')">Жазуучулар</button>
-      <button class="chip" onclick="filterPersons(this,'science')">Илимпоздор</button>
-    </div>
-    <div id="person-detail" style="display:none"></div>
-    <div id="persons-list"></div>
-  </div>
-
-  <!-- TRADITIONS -->
-  <div id="traditions" class="content">
-    <div class="section-label" style="margin-top:0" data-t="traditions_label">САЛТ-САНААЛАР</div>
-    <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="traditions_title">Кыргыз маданияты</div>
-    <div class="text2" style="font-size:11px;margin-bottom:10px" data-t="traditions_sub">Байыркы маданият, салт-санаа, ырым-жырым</div>
-    <div id="traditions-list"></div>
-  </div>
-
-  <div class="bottombar">
-    <button class="nav-item active" onclick="goTo('home',this,0)"><span class="nav-icon">🏠</span><span data-t="nav_home">Башкы</span></button>
-    <button class="nav-item" onclick="goTo('map',this,1)"><span class="nav-icon">🗺</span><span data-t="nav_map">Карта</span></button>
-    <button class="nav-item" onclick="goTo('calendar',this,2)"><span class="nav-icon">📅</span><span data-t="nav_cal">Ай-Күн</span></button>
-    <button class="nav-item" onclick="goTo('muchol',this,3)"><span class="nav-icon">✨</span><span data-t="nav_muchol">Мүчөл</span></button>
-    <button class="nav-item" onclick="goTo('danktuu',this,4)"><span class="nav-icon">👑</span><span data-t="nav_heroes">Даңктуулар</span></button>
-    <button class="nav-item" onclick="goTo('traditions',this,5)"><span class="nav-icon">🏺</span><span data-t="nav_traditions">Салттар</span></button>
+    <div style="font-size:11px;color:#8B1A1A;letter-spacing:4px">✦ ✦ ✦</div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
   </div>
 </div>
 
+<!-- HOME -->
+<div id="home" class="content active">
+  <div class="card card-gold" style="display:flex;align-items:center;gap:12px">
+    <div style="font-size:36px">🏆</div>
+    <div style="flex:1">
+      <div class="gold" style="font-size:15px;font-weight:700" id="rank-title-el">Жаш Манасчы</div>
+      <div class="text2" style="font-size:11px" id="rank-level-el">Деңгээл 1 · 0 XP</div>
+      <div class="progress-bar"><div class="progress-fill" id="xp-bar" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px">
+        <span style="font-size:10px;color:var(--text3)" id="xp-cur">0 XP</span>
+        <span style="font-size:10px;color:var(--text3)" id="xp-max">500 XP</span>
+      </div>
+    </div>
+    <div><span class="streak-badge">🔥 <span id="streak-num">0</span></span></div>
+  </div>
+
+  <div class="ethno-divider"><span>✦ ✦ ✦</span></div>
+  <div class="section-label" data-t="daily_quests">КҮНДҮК ТАПШЫРМАЛАР</div>
+  <div id="quests-container"></div>
+  <button class="btn-outline" onclick="addRandomQuest()" data-t="add_quest">+ Тапшырма кошуу</button>
+
+  <div class="ethno-divider"><span>✦ ✦ ✦</span></div>
+  <div class="section-label" data-t="year_of">2026 — ЖЫЛКЫ ЖЫЛЫ</div>
+  <div class="card" style="display:flex;gap:12px;align-items:center">
+    <div style="font-size:42px">🐎</div>
+    <div>
+      <div class="gold" style="font-weight:700;font-size:15px" data-t="horse_year">Жылкы жылы</div>
+      <div class="text2" style="font-size:11px">год Лошади · 2026</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5" data-t="horse_desc">Эркиндик, энергия жана ийгилик жылы.</div>
+      <div style="display:flex;gap:4px;margin-top:6px">
+        <span class="badge">Эркин</span><span class="badge">Энергиялуу</span><span class="badge">Баатыр</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ethno-divider"><span>✦ ✦ ✦</span></div>
+  <div class="section-label" data-t="todays_calendar">БҮГҮНКҮ АЙ-КҮН</div>
+  <div class="card card-interactive" id="today-card" onclick="goTo('calendar',null,2)"></div>
+
+  <div class="section-label" data-t="did_you_know">БИЛДИҢИЗБИ?</div>
+  <div id="fact-home" class="fact-card"></div>
+  <button class="btn-outline" onclick="rotateFact()" data-t="next_fact">↻ Дагы бир факт</button>
+
+  <div class="section-label" data-t="famous">ДАҢКТУУЛАР</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="home-persons"></div>
+</div>
+
+<!-- MAP -->
+<div id="map" class="content">
+  <div class="section-label" style="margin-top:0">САКРАЛДЫК ЖЕРЛЕР</div>
+  <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="sacred_title">Ыйык жерлер</div>
+  <div class="text2" style="font-size:12px;margin-bottom:10px" data-t="sacred_sub">Кыргызстандын сакралдык жана тарыхый жерлери</div>
+  <div id="leaflet-map"></div>
+  <div class="chips" id="region-chips">
+    <button class="chip active" onclick="filterRegion(this,'all')">Баары</button>
+    <button class="chip" onclick="filterRegion(this,'Ош')">Ош</button>
+    <button class="chip" onclick="filterRegion(this,'Ысык-Көл')">Ысык-Көл</button>
+    <button class="chip" onclick="filterRegion(this,'Талас')">Талас</button>
+    <button class="chip" onclick="filterRegion(this,'Нарын')">Нарын</button>
+    <button class="chip" onclick="filterRegion(this,'Жалал-Абад')">Жалал-Абад</button>
+    <button class="chip" onclick="filterRegion(this,'Чүй')">Чүй</button>
+  </div>
+  <input class="search-bar" placeholder="🔍 Издөө..." oninput="searchPlaces(this.value)">
+  <div id="places-list"></div>
+</div>
+
+<!-- CALENDAR -->
+<div id="calendar" class="content">
+  <div class="month-nav">
+    <button class="month-arrow" onclick="changeMonth(-1)">‹</button>
+    <div style="text-align:center">
+      <div class="gold" style="font-size:17px;font-weight:700" id="month-kg-name">—</div>
+      <div class="text2" style="font-size:13px" id="month-ru-name">—</div>
+      <div class="text3" style="font-size:10px;margin-top:2px" id="month-origin">—</div>
+    </div>
+    <button class="month-arrow" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="text3" style="font-size:9px" data-t="holidays_count">Майрамдар</div><div class="gold" style="font-size:20px;font-weight:700" id="holiday-count">—</div></div>
+    <div class="stat-card"><div class="text3" style="font-size:9px" data-t="month_num">Айдын №</div><div class="gold" style="font-size:20px;font-weight:700" id="month-num">—</div></div>
+    <div class="stat-card"><div class="text3" style="font-size:9px" data-t="days_count">Күн саны</div><div class="gold" style="font-size:20px;font-weight:700" id="days-count">—</div></div>
+  </div>
+  <div class="card" style="padding:12px">
+    <div class="cal-grid">
+      <div class="cal-head" data-t="mon">Дш</div><div class="cal-head" data-t="tue">Шш</div>
+      <div class="cal-head" data-t="wed">Бш</div><div class="cal-head" data-t="thu">Жм</div>
+      <div class="cal-head" data-t="fri">Иш</div>
+      <div class="cal-head" style="color:#C8A86A" data-t="sat">Жк</div>
+      <div class="cal-head" style="color:#C8A86A" data-t="sun">Жк</div>
+    </div>
+    <div class="cal-grid" id="cal-days"></div>
+  </div>
+  <div id="holidays-list" style="margin-top:6px"></div>
+  <div class="section-label" data-t="noorus_section">НООРУЗ ЖӨНҮНДӨ</div>
+  <div class="fact-card">
+    <div class="gold" style="font-size:12px;font-weight:700;margin-bottom:4px">🌸 <span data-t="noorus_title">Нооруз майрамы — 21-март</span></div>
+    <div class="text2" style="font-size:11px;line-height:1.6" data-t="noorus_desc">Жазгы теңелиш. ЮНЕСКО Мурасы. 3000 жылдык тарых.</div>
+  </div>
+</div>
+
+<!-- MUCHOL -->
+<div id="muchol" class="content">
+  <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="muchol_title">✨ 12 Мүчөл — Жылдык цикл</div>
+  <div class="text2" style="font-size:11px;margin-bottom:10px" data-t="muchol_sub">Байыркы Кыргыз астрологиясы · 12 жылдык цикл</div>
+  <div class="fact-card" style="margin-bottom:10px">
+    <div class="text2" style="font-size:11px;line-height:1.6" data-t="muchol_history">12 мүчөл системасы Борбордук Азия аркылуу тараган. Байыркы Түрк-Моңгол маданиятынан келип чыккан. Ар бир жылдын өзүнүн энергиясы жана маанайы бар.</div>
+  </div>
+  <div class="card">
+    <div class="gold" style="font-weight:700;margin-bottom:4px;font-size:13px">🔍 <span data-t="find_your_animal">Өзүңдүн жылыңды тап</span></div>
+    <div class="text3" style="font-size:11px" data-t="enter_birth_year">Туулган жылыңды киргиз</div>
+    <input class="year-input" type="number" placeholder="1990" id="birth-year" min="1900" max="2040">
+    <button class="find-btn" onclick="findAnimal()" data-t="find_btn">Табуу →</button>
+    <div class="result-box" id="animal-result"></div>
+  </div>
+  <div class="much-grid" id="muchol-grid"></div>
+  <div id="animal-detail"></div>
+</div>
+
+<!-- DANKTUU -->
+<div id="danktuu" class="content">
+  <div class="section-label" style="margin-top:0" data-t="heroes_label">УЛУУ ИНСАНДАР</div>
+  <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="heroes_title">Кыргыз элинин даңктуулары</div>
+  <input class="search-bar" placeholder="🔍 Издөө..." oninput="searchPersons(this.value)">
+  <div class="chips" id="person-chips">
+    <button class="chip active" onclick="filterPersons(this,'all')">Баары</button>
+    <button class="chip" onclick="filterPersons(this,'baatyr')">Баатырлар</button>
+    <button class="chip" onclick="filterPersons(this,'akyn')">Акындар</button>
+    <button class="chip" onclick="filterPersons(this,'politic')">Саясатчылар</button>
+    <button class="chip" onclick="filterPersons(this,'writer')">Жазуучулар</button>
+  </div>
+  <div id="person-detail" style="display:none"></div>
+  <div id="persons-list"></div>
+</div>
+
+<!-- TRADITIONS -->
+<div id="traditions" class="content">
+  <div class="section-label" style="margin-top:0" data-t="traditions_label">САЛТ-САНААЛАР</div>
+  <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:3px" data-t="traditions_title">Кыргыз маданияты</div>
+  <div class="text2" style="font-size:11px;margin-bottom:10px" data-t="traditions_sub">Байыркы маданият, салт-санаа, ырым-жырым жана каада-салт</div>
+  <div id="traditions-list"></div>
+</div>
+
+<div class="bottombar">
+  <button class="nav-item active" onclick="goTo('home',this,0)"><span class="nav-icon">🏠</span><span data-t="nav_home">Башкы</span></button>
+  <button class="nav-item" onclick="goTo('map',this,1)"><span class="nav-icon">🗺</span><span data-t="nav_map">Карта</span></button>
+  <button class="nav-item" onclick="goTo('calendar',this,2)"><span class="nav-icon">📅</span><span data-t="nav_cal">Ай-Күн</span></button>
+  <button class="nav-item" onclick="goTo('muchol',this,3)"><span class="nav-icon">✨</span><span data-t="nav_muchol">Мүчөл</span></button>
+  <button class="nav-item" onclick="goTo('danktuu',this,4)"><span class="nav-icon">👑</span><span data-t="nav_heroes">Даңктуулар</span></button>
+  <button class="nav-item" onclick="goTo('traditions',this,5)"><span class="nav-icon">🏺</span><span data-t="nav_traditions">Салттар</span></button>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal(null,true)">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- XP TOAST -->
+<div class="xp-toast" id="xp-toast"></div>
+
 <script>
-var lang='ky',isDark=true;
-var xpTotal=3450,xpQuests=0;
+var lang='ky', isDark=true, xpTotal=0, streak=0;
+
+var LEVELS=[
+  {min:0,   max:500,  rank:{ky:'Жаш Манасчы',  ru:'Молодой Манасчи',en:'Young Manaschi'},  lvl:1},
+  {min:500, max:1200, rank:{ky:'Манасчы',       ru:'Манасчи',        en:'Manaschi'},         lvl:2},
+  {min:1200,max:2500, rank:{ky:'Акын',           ru:'Акын',           en:'Akyn'},             lvl:3},
+  {min:2500,max:5000, rank:{ky:'Баатыр',         ru:'Богатырь',       en:'Hero'},             lvl:4},
+  {min:5000,max:99999,rank:{ky:'Манас Каганы',   ru:'Каган Манаса',   en:'Manas Khan'},       lvl:5},
+];
 
 var T={
-  ky:{
-    rank_title:'Жаш Манасчы',rank_level:'Деңгээл 12',
-    daily_quests:'КҮНДҮК ТАПШЫРМАЛАР',add_quest:'+ Тапшырма кошуу',
-    year_of:'2026 — ЖЫЛКЫ ЖЫЛЫ',horse_year:'Жылкы жылы',
-    horse_desc:'Эркиндик, энергия жана ийгилик жылы. Чечкиндүү кадамдар үчүн кол айлуу убакыт.',
-    tr_free:'Эркин',tr_energy:'Энергиялуу',tr_brave:'Баатыр',
-    todays_calendar:'БҮГҮНКҮ АЙ-КҮН',did_you_know:'БИЛДИҢИЗБИ?',
-    next_fact:'↻ Дагы бир факт',famous:'ДАҢКТУУЛАР',
-    sacred_places:'САКРАЛДЫК ЖЕРЛЕР',sacred_title:'Ыйык жерлер',
-    sacred_sub:'Кыргызстандын сакралдык жана тарыхый жерлери',
-    map_open:'Картаны ачуу',open_map_btn:'Картада ач',
-    all:'Баары',search_places:'🔍 Издөө...',
-    holidays_count:'Майрамдар',month_num:'Айдын №',days_count:'Күн саны',
-    mon:'Дш',tue:'Шш',wed:'Бш',thu:'Жм',fri:'Иш',sat:'Жк',sun:'Жк',
-    noorus_section:'НООРУЗ ЖӨНҮНДӨ',noorus_title:'Нооруз — 21-март',
-    noorus_desc:'Жазгы теңелиш. ЮНЕСКО дүйнөлүк маданий мурасы. 3000 жылдык тарых.',
-    muchol_title:'✨ 12 Мүчөл — Жылдык цикл',muchol_sub:'Байыркы Кыргыз астрологиясы',
-    muchol_history:'12 мүчөл системасы Борбордук Азия аркылуу тараган. Ар бир жылдын өзүнүн энергиясы бар.',
-    find_your_animal:'Өзүңдүн жылыңды тап',enter_birth_year:'Туулган жылыңды киргиз',find_btn:'Табуу →',
-    heroes_label:'УЛУУ ИНСАНДАР',heroes_title:'Кыргыз элинин даңктуулары',search_persons:'🔍 Издөө...',
-    traditions_label:'САЛТ-САНААЛАР',traditions_title:'Кыргыз маданияты',traditions_sub:'Байыркы маданият жана салт-санаа',
-    nav_home:'Башкы',nav_map:'Карта',nav_cal:'Ай-Күн',nav_muchol:'Мүчөл',nav_heroes:'Даңктуулар',nav_traditions:'Салттар',
-    back:'← Артка',description:'📖 Сүрөттөмө',legend:'🌙 Уламыш',biography:'📖 Өмүр баяны',location:'📍 Координаттар',
-    traits:'Сапаттары',years:'Жылдары',prophecy_title:'🔮 Болжол',
-    completed:'Аткарылды!',xp_earned:'XP топтолду'
-  },
-  ru:{
-    rank_title:'Молодой Манасчи',rank_level:'Уровень 12',
-    daily_quests:'ЕЖЕДНЕВНЫЕ ЗАДАНИЯ',add_quest:'+ Добавить задание',
-    year_of:'2026 — ГОД ЛОШАДИ',horse_year:'Год Лошади',
-    horse_desc:'Год свободы, энергии и успеха. Благоприятное время для решительных шагов.',
-    tr_free:'Свободный',tr_energy:'Энергичный',tr_brave:'Смелый',
-    todays_calendar:'СЕГОДНЯ В КАЛЕНДАРЕ',did_you_know:'ЗНАЕТЕ ЛИ ВЫ?',
-    next_fact:'↻ Ещё факт',famous:'ЗНАМЕНИТОСТИ',
-    sacred_places:'САКРАЛЬНЫЕ МЕСТА',sacred_title:'Священные места',
-    sacred_sub:'Сакральные и исторические места Кыргызстана',
-    map_open:'Открыть карту',open_map_btn:'Открыть на карте',
-    all:'Все',search_places:'🔍 Поиск...',
-    holidays_count:'Праздников',month_num:'Номер месяца',days_count:'Дней',
-    mon:'Пн',tue:'Вт',wed:'Ср',thu:'Чт',fri:'Пт',sat:'Сб',sun:'Вс',
-    noorus_section:'О НООРУЗ',noorus_title:'Нооруз — 21 марта',
-    noorus_desc:'Весеннее равноденствие. Наследие ЮНЕСКО. 3000-летняя история.',
-    muchol_title:'✨ 12 Мүчөл — Годовой цикл',muchol_sub:'Древняя кыргызская астрология',
-    muchol_history:'Система 12 животных распространилась через Центральную Азию. Каждый год имеет свою энергию.',
-    find_your_animal:'Найди свой год',enter_birth_year:'Введи год рождения',find_btn:'Найти →',
-    heroes_label:'ВЕЛИКИЕ ЛИЧНОСТИ',heroes_title:'Знаменитости кыргызского народа',search_persons:'🔍 Поиск...',
-    traditions_label:'ТРАДИЦИИ',traditions_title:'Культура кыргызов',traditions_sub:'Древняя культура и традиции',
-    nav_home:'Главная',nav_map:'Карта',nav_cal:'Календарь',nav_muchol:'Мүчөл',nav_heroes:'Знаменитые',nav_traditions:'Традиции',
-    back:'← Назад',description:'📖 Описание',legend:'🌙 Легенда',biography:'📖 Биография',location:'📍 Координаты',
-    traits:'Характеристики',years:'Годы',prophecy_title:'🔮 Предсказание',
-    completed:'Выполнено!',xp_earned:'XP получено'
-  },
-  en:{
-    rank_title:'Young Manaschi',rank_level:'Level 12',
-    daily_quests:'DAILY QUESTS',add_quest:'+ Add Quest',
-    year_of:'2026 — YEAR OF HORSE',horse_year:'Year of the Horse',
-    horse_desc:'A year of freedom, energy and success. A favorable time for bold decisions.',
-    tr_free:'Free-spirited',tr_energy:'Energetic',tr_brave:'Brave',
-    todays_calendar:"TODAY'S CALENDAR",did_you_know:'DID YOU KNOW?',
-    next_fact:'↻ Another fact',famous:'FAMOUS PEOPLE',
-    sacred_places:'SACRED PLACES',sacred_title:'Sacred Sites',
-    sacred_sub:'Sacred and historical sites of Kyrgyzstan',
-    map_open:'Open map',open_map_btn:'Open in map',
-    all:'All',search_places:'🔍 Search...',
-    holidays_count:'Holidays',month_num:'Month No.',days_count:'Days',
-    mon:'Mo',tue:'Tu',wed:'We',thu:'Th',fri:'Fr',sat:'Sa',sun:'Su',
-    noorus_section:'ABOUT NOORUZ',noorus_title:'Nooruz — March 21',
-    noorus_desc:'Spring Equinox. UNESCO World Heritage. 3000-year-old history.',
-    muchol_title:'✨ 12 Mүchöl — Annual Cycle',muchol_sub:'Ancient Kyrgyz astrology',
-    muchol_history:'The 12-animal system spread through Central Asia. Each year carries its own energy.',
-    find_your_animal:'Find your year',enter_birth_year:'Enter birth year',find_btn:'Find →',
-    heroes_label:'GREAT PERSONALITIES',heroes_title:'Famous people of Kyrgyzstan',search_persons:'🔍 Search...',
-    traditions_label:'TRADITIONS',traditions_title:'Kyrgyz Culture',traditions_sub:'Ancient culture and customs',
-    nav_home:'Home',nav_map:'Map',nav_cal:'Calendar',nav_muchol:'Mүchöl',nav_heroes:'Famous',nav_traditions:'Traditions',
-    back:'← Back',description:'📖 Description',legend:'🌙 Legend',biography:'📖 Biography',location:'📍 Coordinates',
-    traits:'Traits',years:'Years',prophecy_title:'🔮 Prophecy',
-    completed:'Completed!',xp_earned:'XP earned'
-  }
+  ky:{daily_quests:'КҮНДҮК ТАПШЫРМАЛАР',add_quest:'+ Тапшырма кошуу',year_of:'2026 — ЖЫЛКЫ ЖЫЛЫ',horse_year:'Жылкы жылы',horse_desc:'Эркиндик, энергия жана ийгилик жылы.',todays_calendar:'БҮГҮНКҮ АЙ-КҮН',did_you_know:'БИЛДИҢИЗБИ?',next_fact:'↻ Дагы бир факт',famous:'ДАҢКТУУЛАР',sacred_title:'Ыйык жерлер',sacred_sub:'Кыргызстандын сакралдык жана тарыхый жерлери',holidays_count:'Майрамдар',month_num:'Айдын №',days_count:'Күн саны',mon:'Дш',tue:'Шш',wed:'Бш',thu:'Жм',fri:'Иш',sat:'Жк',sun:'Жк',noorus_section:'НООРУЗ ЖӨНҮНДӨ',noorus_title:'Нооруз — 21-март',noorus_desc:'Жазгы теңелиш. ЮНЕСКО Мурасы. 3000 жылдык тарых.',muchol_title:'✨ 12 Мүчөл — Жылдык цикл',muchol_sub:'Байыркы Кыргыз астрологиясы',muchol_history:'12 мүчөл системасы Борбордук Азия аркылуу тараган. Байыркы Түрк-Моңгол маданиятынан келип чыккан. Ар бир жылдын өзүнүн энергиясы жана маанайы бар.',find_your_animal:'Өзүңдүн жылыңды тап',enter_birth_year:'Туулган жылыңды киргиз',find_btn:'Табуу →',heroes_label:'УЛУУ ИНСАНДАР',heroes_title:'Кыргыз элинин даңктуулары',traditions_label:'САЛТ-САНААЛАР',traditions_title:'Кыргыз маданияты',traditions_sub:'Байыркы маданият, салт-санаа, ырым-жырым жана каада-салт',nav_home:'Башкы',nav_map:'Карта',nav_cal:'Ай-Күн',nav_muchol:'Мүчөл',nav_heroes:'Даңктуулар',nav_traditions:'Салттар',back:'← Артка',desc_lbl:'📖 Сүрөттөмө',legend_lbl:'🌙 Уламыш',howto_lbl:'🚗 Кантип барса болот',bio_lbl:'📖 Өмүр баяны',location_lbl:'📍 Координаттар',traits_lbl:'Сапаттары',years_lbl:'Жылдары',prophecy_lbl:'🔮 Болжол',open_map:'🗺 Картада ач',del_quest:'Өчүрүү'},
+  ru:{daily_quests:'ЕЖЕДНЕВНЫЕ ЗАДАНИЯ',add_quest:'+ Добавить задание',year_of:'2026 — ГОД ЛОШАДИ',horse_year:'Год Лошади',horse_desc:'Год свободы, энергии и успеха.',todays_calendar:'СЕГОДНЯ В КАЛЕНДАРЕ',did_you_know:'ЗНАЕТЕ ЛИ ВЫ?',next_fact:'↻ Ещё факт',famous:'ЗНАМЕНИТОСТИ',sacred_title:'Священные места',sacred_sub:'Сакральные и исторические места Кыргызстана',holidays_count:'Праздников',month_num:'Номер месяца',days_count:'Дней',mon:'Пн',tue:'Вт',wed:'Ср',thu:'Чт',fri:'Пт',sat:'Сб',sun:'Вс',noorus_section:'О НООРУЗ',noorus_title:'Нооруз — 21 марта',noorus_desc:'Весеннее равноденствие. Наследие ЮНЕСКО. 3000-летняя история.',muchol_title:'✨ 12 Мүчөл — Годовой цикл',muchol_sub:'Древняя кыргызская астрология',muchol_history:'Система 12 животных распространилась через Центральную Азию. Каждый год несёт свою энергию.',find_your_animal:'Найди свой год',enter_birth_year:'Введи год рождения',find_btn:'Найти →',heroes_label:'ВЕЛИКИЕ ЛИЧНОСТИ',heroes_title:'Знаменитости кыргызского народа',traditions_label:'ТРАДИЦИИ',traditions_title:'Культура кыргызов',traditions_sub:'Древняя культура, традиции и обычаи',nav_home:'Главная',nav_map:'Карта',nav_cal:'Календарь',nav_muchol:'Мүчөл',nav_heroes:'Знаменитые',nav_traditions:'Традиции',back:'← Назад',desc_lbl:'📖 Описание',legend_lbl:'🌙 Легенда',howto_lbl:'🚗 Как добраться',bio_lbl:'📖 Биография',location_lbl:'📍 Координаты',traits_lbl:'Характеристики',years_lbl:'Годы',prophecy_lbl:'🔮 Предсказание',open_map:'🗺 Открыть на карте',del_quest:'Удалить'},
+  en:{daily_quests:'DAILY QUESTS',add_quest:'+ Add Quest',year_of:'2026 — YEAR OF HORSE',horse_year:'Year of the Horse',horse_desc:'A year of freedom, energy and success.',todays_calendar:"TODAY'S CALENDAR",did_you_know:'DID YOU KNOW?',next_fact:'↻ Another fact',famous:'FAMOUS PEOPLE',sacred_title:'Sacred Sites',sacred_sub:'Sacred and historical sites of Kyrgyzstan',holidays_count:'Holidays',month_num:'Month No.',days_count:'Days',mon:'Mo',tue:'Tu',wed:'We',thu:'Th',fri:'Fr',sat:'Sa',sun:'Su',noorus_section:'ABOUT NOORUZ',noorus_title:'Nooruz — March 21',noorus_desc:'Spring Equinox. UNESCO Heritage. 3000-year history.',muchol_title:'✨ 12 Mүchöl — Annual Cycle',muchol_sub:'Ancient Kyrgyz astrology',muchol_history:'The 12-animal system spread through Central Asia. Each year carries its own energy.',find_your_animal:'Find your year',enter_birth_year:'Enter birth year',find_btn:'Find →',heroes_label:'GREAT PERSONALITIES',heroes_title:'Famous people of Kyrgyzstan',traditions_label:'TRADITIONS',traditions_title:'Kyrgyz Culture',traditions_sub:'Ancient culture, traditions and customs',nav_home:'Home',nav_map:'Map',nav_cal:'Calendar',nav_muchol:'Mүchöl',nav_heroes:'Famous',nav_traditions:'Traditions',back:'← Back',desc_lbl:'📖 Description',legend_lbl:'🌙 Legend',howto_lbl:'🚗 How to get there',bio_lbl:'📖 Biography',location_lbl:'📍 Coordinates',traits_lbl:'Traits',years_lbl:'Years',prophecy_lbl:'🔮 Prophecy',open_map:'🗺 Open in map',del_quest:'Delete'}
 };
+function t(k){return(T[lang]&&T[lang][k])||T.ky[k]||k;}
 
 var places=[
   {id:1,name:{ky:'Сулайман-Тоо',ru:'Сулайман-Тоо',en:'Sulayman Mountain'},
-   type:{ky:'Ыйык тоо',ru:'Священная гора',en:'Sacred Mountain'},
-   region:'Ош',emoji:'⛰',
+   type:{ky:'Ыйык тоо',ru:'Священная гора',en:'Sacred Mountain'},region:'Ош',emoji:'⛰',
+   photo:'images/places/sulayman.jpg',
    coords:{lat:40.5285,lng:72.7985},
-   desc:{ky:'ЮНЕСКО дүйнөлүк мурасынын объектиси. Миң жылдык зиярат жери. Ош шаарынын символу. Тоонун бийиктиги 1100 м. Байыркы Шелк Жолунун боюнда жайгашкан.',
-         ru:'Объект Всемирного наследия ЮНЕСКО. Тысячелетнее место паломничества. Символ города Ош. Высота 1100 м. Расположен на древнем Шёлковом пути.',
-         en:'UNESCO World Heritage Site. Millennium pilgrimage destination. Symbol of Osh city. Height 1100m. Located on the ancient Silk Road.'},
-   legend:{ky:'Сулайман пайгамбар бул тоодо намаз окуган дешет. Бабур падышасы XVI кылымда бул жерде мечит куруп, Намазга (намаз жери) деп атаган. Тоону үч жолу айланган адам шыпаа табат деген ишеним бар.',
-           ru:'По преданию, пророк Сулейман молился на этой горе. Бабур в XVI веке построил здесь мечеть. Считается, что обойти гору трижды — значит исцелиться.',
-           en:'Prophet Sulayman is said to have prayed here. Babur built a mosque here in the 16th century. It is believed that walking around the mountain three times brings healing.'},
-   facts:[{ky:'1-кылымда Кытай жазмаларында айтылат',ru:'Упоминается в китайских текстах I века',en:'Mentioned in Chinese texts from the 1st century'},
-          {ky:'2009-жылы ЮНЕСКО тизмесине кирди',ru:'Внесён в список ЮНЕСКО в 2009 году',en:'Added to UNESCO list in 2009'}]},
-
+   desc:{ky:'ЮНЕСКО дүйнөлүк мурасынын объектиси. Миң жылдык зиярат жери. Ош шаарынын символу. Тоонун бийиктиги 1100 м. Байыркы Шелк Жолунун боюнда жайгашкан. Тоонун үстүнө чыгуу — рухий тазалануу деп эсептелет.',
+         ru:'Объект Всемирного наследия ЮНЕСКО. Тысячелетнее место паломничества. Символ Оша. Высота 1100 м. На Шёлковом пути. Подъём на гору считается духовным очищением.',
+         en:'UNESCO World Heritage. Millennium pilgrimage site. Symbol of Osh. 1100m high. On the Silk Road. Climbing is considered spiritual purification.'},
+   legend:{ky:'Сулайман пайгамбар бул тоодо намаз окуган деп айтылат. Бабур падышасы XVI кылымда "Тахти Сулайман" мечитин курган. Тоону үч жолу айланган адам шыпаа табат деген байыркы ишеним бар.',
+           ru:'Говорят, что пророк Сулейман молился здесь. Бабур в XVI веке построил мечеть "Тахти Сулайман". Обойти гору трижды — исцелиться.',
+           en:'Prophet Sulayman prayed here. Babur built "Takht-i-Sulaiman" mosque in 16th century. Walking around 3 times is believed to bring healing.'},
+   howto:{ky:'🚌 Ош шаарынын борборунан 1 км. Маршрутка №2, 7 же 15 — Сулайман-Тоо токтомуна чейин. 🚕 Такси 50-100 сом. 🚶 Жаяан жол борборлук ипподромдон 15 мүнөт. Кириш акысы — 50 сом.',
+           ru:'🚌 1 км от центра Оша. Маршрутки №2, 7, 15 до остановки Сулайман-Тоо. 🚕 Такси 50-100 сом. 🚶 Пешком от центра 15 минут. Входной билет — 50 сом.',
+           en:'🚌 1km from Osh center. Minibuses #2, 7, 15 to Sulayman-Too stop. 🚕 Taxi 50-100 som. 🚶 15 min walk from center. Entry fee — 50 som.'},
+   facts:[{ky:'2009-жылы ЮНЕСКО Дүйнөлүк Мурас тизмесине кирди',ru:'Включён в список ЮНЕСКО в 2009 году',en:'UNESCO listed in 2009'},{ky:'Тоонун бийиктиги деңиз деңгелинен 1100 метр',ru:'Высота — 1100 м над уровнем моря',en:'Height — 1100m above sea level'}]},
   {id:2,name:{ky:'Ысык-Көл',ru:'Иссык-Куль',en:'Issyk-Kul Lake'},
-   type:{ky:'Ыйык көл',ru:'Священное озеро',en:'Sacred Lake'},
-   region:'Ысык-Көл',emoji:'💧',
+   type:{ky:'Ыйык көл',ru:'Священное озеро',en:'Sacred Lake'},region:'Ысык-Көл',emoji:'💧',
+   photo:'images/places/issykkul.jpg',
    coords:{lat:42.45,lng:77.2},
-   desc:{ky:'Дүйнөдөгү экинчи ири тоолуу көл. 6236 чарчы км. Бийиктиги 1607 м. Эч качан тоңбойт. Суусунун тузу деңиздин сугунун 6 эсе аз. Жылына 2 миллиондон ашык турист келет.',
-         ru:'Второе по величине горное озеро в мире. 6236 км². Высота 1607 м. Никогда не замерзает. Солёность в 6 раз меньше океанской. Ежегодно более 2 млн туристов.',
-         en:'Second largest mountain lake in the world. 6,236 km². Altitude 1,607m. Never freezes. Salinity 6 times less than ocean. Over 2 million tourists annually.'},
-   legend:{ky:'Байыркы Чигу шаары көлдүн түбүндө жатат деп айтылат. Александр Македонский бул жерде эс алган. Кыргыздар Ысык-Көлдү ыйык деп эсептеп, анда балык кармоону жана киргизлерди кое бербеген.',
-           ru:'Говорят, что на дне озера лежит древний город Чигу. Александр Македонский отдыхал здесь. Кыргызы считали озеро священным и не разрешали ловить рыбу.',
-           en:'The ancient city of Chigu is said to lie at the bottom. Alexander the Great rested here. Kyrgyz considered the lake sacred and forbade fishing in it.'},
-   facts:[{ky:'Жер бетиндеги эң ири тоолуу көлдөрдүн бири',ru:'Одно из крупнейших горных озёр планеты',en:'One of the largest mountain lakes on Earth'},
-          {ky:'Советтер убагында сүзмө аппараттарды сынашкан',ru:'В советское время испытывали подводные аппараты',en:'Submarines were tested here during Soviet times'}]},
-
+   desc:{ky:'Дүйнөдөгү экинчи ири тоолуу көл. Аянты 6236 чарчы км. Бийиктиги 1607 метр. Эч качан тоңбойт — жылына 300 күн күн жарык. Сууда туз деңиздикинен 6 эсе аз. Жылына 2 миллиондон ашык турист.',
+         ru:'Второе по величине горное озеро. Площадь 6236 км². Высота 1607 м. Никогда не замерзает — 300 солнечных дней. Солёность в 6 раз меньше океанской. 2+ млн туристов ежегодно.',
+         en:'Second largest mountain lake. 6,236 km². 1,607m high. Never freezes — 300 sunny days. 6x less salty than ocean. 2+ million tourists annually.'},
+   legend:{ky:'Байыркы Чигу шаары көлдүн түбүндө жатат деп айтылат. Александр Македонский аскерлери менен бул жерде эс алган. Кыргыздар Ысык-Көлдү "Жыргалчылыктын жери" деп аташкан.',
+           ru:'На дне озера якобы лежит древний город Чигу. Александр Македонский отдыхал здесь. Кыргызы называли озеро "Местом блаженства".',
+           en:'Ancient city of Chigu lies at the bottom. Alexander the Great rested here. Kyrgyz called it "The Place of Bliss".'},
+   howto:{ky:'🚌 Бишкектен Балыкчыга маршрутка — 3 саат, 200-250 сом. 🚕 Такси — 1500-2000 сом. 🚘 Машина менен А365 жол аркылуу — 3.5 саат.',
+           ru:'🚌 Из Бишкека до Балыкчи — 3 часа, 200-250 сом. 🚕 Такси — 1500-2000 сом. 🚘 На машине по трассе А365 — 3.5 часа.',
+           en:'🚌 Bishkek to Balykchy — 3 hrs, 200-250 som. 🚕 Taxi — 1500-2000 som. 🚘 By car via A365 — 3.5 hrs.'},
+   facts:[{ky:'Эң тереңи — 668 метр',ru:'Максимальная глубина — 668 м',en:'Maximum depth — 668m'},{ky:'Советтер убагында сүзмө аппараттарды сынашкан',ru:'В советское время испытывали подлодки',en:'Submarines tested here in Soviet era'}]},
   {id:3,name:{ky:'Манас Ордо',ru:'Манас Ордо',en:'Manas Ordo'},
-   type:{ky:'Тарыхый комплекс',ru:'Исторический комплекс',en:'Historical Complex'},
-   region:'Талас',emoji:'🏛',
+   type:{ky:'Тарыхый комплекс',ru:'Исторический комплекс',en:'Historical Complex'},region:'Талас',emoji:'🏛',
+   photo:'images/places/manas_ordo.jpg',
    coords:{lat:42.523,lng:72.2421},
-   desc:{ky:'Манас баатырга арналган XIV кылымдагы мавзолей. Талас өрөөнүндө жайгашкан. Кыргыз эпосунун жүрөгү. "Гүмбөз Манас" деп да аталат. 1334-жылы курулган.',
-         ru:'Мавзолей XIV века, посвящённый герою Манасу. Расположен в Таласской долине. Сердце кыргызского эпоса. Также называется "Гүмбөз Манас". Построен в 1334 году.',
-         en:'14th century mausoleum dedicated to hero Manas. Located in Talas Valley. Heart of the Kyrgyz epic. Also called "Gumbez Manas". Built in 1334.'},
-   legend:{ky:'Каныкей Манасты жашыруу үчүн мавзолейдин эшигине "Сейитбек кызы Канике" деп жазган. Мавзолейди зыярат кылган адамдар Манастын рухунан бата алат деп ишенишет.',
-           ru:'Чтобы скрыть место захоронения, Каныкей написала на входе "Дочь Сейитбека Каникей". Верят, что посещающие получают благословение духа Манаса.',
-           en:'To conceal Manas\'s burial, Kanykei wrote "Daughter of Seiitbek Kanikei" on the entrance. Visitors are believed to receive a blessing from the spirit of Manas.'},
-   facts:[{ky:'1334-жылы Гүмбөз Манас курулган',ru:'Мавзолей построен в 1334 году',en:'The mausoleum was built in 1334'},
-          {ky:'Кыргыз Манасиадасы ар 4 жылда бир жерде өтөт',ru:'Кыргызская Манасиада проходит каждые 4 года',en:'Kyrgyz Manasiada takes place every 4 years'}]},
-
+   desc:{ky:'Манас баатырга арналган XIV кылымдагы мавзолей. Талас өрөөнүндө, Талас шаарынан 18 км. 1334-жылы курулган. Аянты 5 гектар. Комплексте мавзолей, музей жана эстелик бар.',
+         ru:'Мавзолей XIV века, посвящённый Манасу. Таласская долина, 18 км от Таласа. Построен в 1334 году. Площадь 5 га.',
+         en:'14th century mausoleum of Manas. Talas Valley, 18km from Talas. Built 1334. 5ha complex.'},
+   legend:{ky:'Каныкей Манасты жашыруу максатында мавзолейдин эшигине "Сейитбек кызы Канике" деп жаздырган.',
+           ru:'Каныкей написала "Дочь Сейитбека Каникей" — чтобы скрыть могилу Манаса.',
+           en:'Kanykei wrote "Daughter of Seiitbek Kanikei" to hide Manas grave.'},
+   howto:{ky:'🚌 Талас шаарынан маршрутка же такси — 25-30 мүнөт, 150-200 сом. Бишкектен Таласка — 6 саат. Кириш бекер.',
+           ru:'🚌 Из Таласа маршрутка или такси — 25-30 минут. Из Бишкека до Таласа — 6 часов. Вход свободный.',
+           en:'🚌 From Talas — minibus or taxi 25-30 min. Bishkek–Talas — 6 hrs. Free entry.'},
+   facts:[{ky:'1334-жылы Тимур доорунда курулган',ru:'Построен в 1334 году в эпоху Тимура',en:'Built 1334 in Timurid era'},{ky:'Кыргыз Манасиадасы ар 4 жылда ушул жерде өтөт',ru:'Манасиада проходит здесь каждые 4 года',en:'Manasiada held here every 4 years'}]},
   {id:4,name:{ky:'Арсланбоб',ru:'Арсланбоб',en:'Arslanbob'},
-   type:{ky:'Ыйык токой',ru:'Священный лес',en:'Sacred Forest'},
-   region:'Жалал-Абад',emoji:'🌲',
+   type:{ky:'Ыйык токой',ru:'Священный лес',en:'Sacred Forest'},region:'Жалал-Абад',emoji:'🌲',
+   photo:'images/places/arslanbob.jpg',
    coords:{lat:41.3338,lng:72.9178},
-   desc:{ky:'Дүйнөдөгү эң ири жаратылыш жаңгак токою. 700 000 гектар. Миң жылдык жаңгак дарактары. Эки шарлама суу. ЮНЕСКО кирген. Жалал-Абад облусунда жайгашкан.',
-         ru:'Крупнейший природный ореховый лес в мире. 700 000 га. Тысячелетние ореховые деревья. Два водопада. Включён в ЮНЕСКО. Расположен в Джалал-Абадской области.',
-         en:'Largest natural walnut forest in the world. 700,000 hectares. Thousand-year-old walnut trees. Two waterfalls. UNESCO listed. Located in Jalal-Abad region.'},
-   legend:{ky:'Пайгамбар жаннаттан жаңгак отургузуш үчүн кулуну Арсланбобду жөнөткөн деген уламыш бар. Арсланбоб — арстандын арбагы дегенди билдирет. Токойдогу ар бир дарак ыйык деп эсептелет.',
-           ru:'Легенда гласит, что пророк послал своего слугу Арсланбоба посадить орехи из рая. Арсланбоб означает "дух льва". Каждое дерево в лесу считается священным.',
-           en:'Legend says a prophet sent his servant Arslanbob to plant heavenly walnuts. Arslanbob means "spirit of the lion". Every tree in the forest is considered sacred.'},
-   facts:[{ky:'Токойдун жашы 1000 жылдан ашык',ru:'Возраст леса более 1000 лет',en:'The forest is over 1,000 years old'},
-          {ky:'Жылына 100 тоннадан ашык жаңгак жыйналат',ru:'Ежегодно собирают более 100 тонн орехов',en:'Over 100 tonnes of walnuts harvested annually'}]},
-
+   desc:{ky:'Дүйнөдөгү эң ири жаратылыш жаңгак токою. Аянты 700 000 гектар. 1000 жылдан ашык жашаган жаңгак дарактары. Эки сулуу шарлама суу.',
+         ru:'Крупнейший природный ореховый лес в мире. Площадь 700 000 га. Два красивых водопада.',
+         en:'Largest natural walnut forest. 700,000 hectares. Two beautiful waterfalls.'},
+   legend:{ky:'Пайгамбар жаннаттан жаңгак отургузуш үчүн кулуну Арсланбобду жөнөткөн деген уламыш бар.',
+           ru:'По легенде, пророк послал слугу Арсланбоба посадить орехи из рая.',
+           en:'A prophet sent servant Arslanbob to plant heavenly walnuts.'},
+   howto:{ky:'🚌 Жалал-Абад шаарынан маршрутка — 1-1.5 саат, 100-150 сом. 🚕 Такси — 500-600 сом.',
+           ru:'🚌 Из Джалал-Абада маршрутка — 1-1.5 часа. Такси — 500-600 сом.',
+           en:'🚌 From Jalal-Abad — 1-1.5 hrs, 100-150 som. Taxi — 500-600 som.'},
+   facts:[{ky:'Жылына 1500 тоннадан ашык жаңгак өнүмдөрү жыйналат',ru:'Ежегодно собирают 1500+ тонн орехов',en:'1500+ tonnes of walnuts harvested annually'}]},
   {id:5,name:{ky:'Сон-Көл',ru:'Сон-Куль',en:'Son-Kul Lake'},
-   type:{ky:'Жайлоо / Көл',ru:'Джайлоо / Озеро',en:'Jailoo / Lake'},
-   region:'Нарын',emoji:'🏔',
+   type:{ky:'Жайлоо / Көл',ru:'Джайлоо / Озеро',en:'Jailoo / Lake'},region:'Нарын',emoji:'🏔',
+   photo:'images/places/sonkul.jpg',
    coords:{lat:41.8069,lng:75.1417},
-   desc:{ky:'3016 метр бийиктиктеги асемал тоолуу көл. Аянты 270 чарчы км. Жайында жайлоо турмушу. Кыргыздар үчүн тынчтыктын символу. Жылкы, кой жана ири мал жайылат.',
-         ru:'Горное озеро на высоте 3016 м. Площадь 270 км². Летом — джайлоо. Символ покоя для кыргызов. Пасутся лошади, овцы и крупный скот.',
-         en:'Mountain lake at 3,016m altitude. Area 270 km². Summer jailoo (pasture). Symbol of peace for Kyrgyz. Horses, sheep and cattle graze here.'},
-   legend:{ky:'Сон-Көл — түш жана уйку дегенди билдирет. Байыркы убакта шамандар бул жерде ырым жасашкан. Кудай бул жерди адамдарга жайлоо катары берген деп айтышат.',
-           ru:'Сон-Куль означает "сон и дрёма". В древности шаманы совершали здесь обряды. Говорят, что Бог отдал это место людям как летнее пастбище.',
-           en:'Son-Kul means "dream and slumber". Ancient shamans performed rituals here. It is said God gave this place to people as a summer pasture.'},
-   facts:[{ky:'Июнь-август айларында жайлоо иштейт',ru:'Джайлоо работает с июня по август',en:'Jailoo operates from June to August'},
-          {ky:'Тоолуу жаныбарлардын 1000дан ашык түрү жашайт',ru:'Обитает более 1000 видов горных животных',en:'Over 1000 mountain animal species inhabit the area'}]},
-
-  {id:6,name:{ky:'Жети-Огуз',ru:'Джеты-Огуз',en:'Jety-Oguz'},
-   type:{ky:'Аска / Шарлама',ru:'Скалы / Водопад',en:'Rocks / Waterfall'},
-   region:'Ысык-Көл',emoji:'🔴',
-   coords:{lat:42.3542,lng:78.2006},
-   desc:{ky:'Жети кызыл аска Ысык-Көлдүн чыгышында. Бийиктиги 80-100м. "Жеті өгіз" — жети өгүз дегенди билдирет. Аяз-Хан мурас комплекси. Шаршырама жана жашыл жайлоолор.',
-         ru:'Семь красных скал на востоке Иссык-Куля. Высота 80-100м. Означает "семь быков". Горно-курортный комплекс. Водопад и зелёные джайлоо.',
-         en:'Seven red rocks east of Issyk-Kul. Height 80-100m. Means "seven bulls". Mountain resort complex. Waterfall and green jailoos.'},
-   legend:{ky:'Байыркы уламышта эки хан бир сулуу кызга ашык болушкан. Бир хан кызды өлтүрүп, экинчисин ыйлаткан. Кудай жети өгүздү аскага айландырып жаза берген деп айтышат.',
-           ru:'По легенде, два хана влюбились в одну красавицу. Один хан убил её, другой заплакал. Бог превратил семь быков в скалы как наказание.',
-           en:'According to legend, two khans fell in love with the same beauty. One khan killed her, the other wept. God turned seven bulls into rocks as punishment.'},
-   facts:[{ky:'Аскалар кызгылт сары минералдардан турат',ru:'Скалы состоят из красноватых минералов',en:'The rocks consist of reddish minerals'},
-          {ky:'Санаторий 1930-жылдан бери иштейт',ru:'Санаторий работает с 1930 года',en:'The sanatorium has operated since 1930'}]},
-
-  {id:7,name:{ky:'Таш Рабат',ru:'Таш Рабат',en:'Tash Rabat'},
-   type:{ky:'Байыркы карван сарай',ru:'Древний каравансарай',en:'Ancient Caravanserai'},
-   region:'Нарын',emoji:'🕌',
+   desc:{ky:'3016 метр бийиктиктеги асемал тоолуу көл. Аянты 270 чарчы км. Жайында жайлоо жашоосу — кыргыз боз үйлөрү, жылкылар, кой суруулары.',
+         ru:'Горное озеро на высоте 3016 м. Площадь 270 км². Летом — джайлоо: юрты, лошади, отары.',
+         en:'Mountain lake at 3,016m. 270 km². Summer jailoo — yurts, horses, herds.'},
+   legend:{ky:'"Сон-Көл" — түш жана уйку дегенди билдирет. Байыркы убакта шамандар бул жерде ырым жасашкан.',
+           ru:'"Сон-Куль" — "сон и дрёма". Шаманы проводили здесь обряды.',
+           en:'"Son-Kul" means "dream and slumber". Shamans held rituals here.'},
+   howto:{ky:'🚘 Нарын шаарынан 100 км. ☀️ Июнь–Сентябрь гана. 🚙 4x4 унаа зарыл.',
+           ru:'🚘 100 км от Нарына. ☀️ Только июнь–сентябрь. 🚙 Нужен 4x4.',
+           en:'🚘 100km from Naryn. ☀️ June–September only. 🚙 4x4 needed.'},
+   facts:[{ky:'Жайлоо мезгили: июнь–август',ru:'Сезон: июнь–август',en:'Season: June–August'}]},
+  {id:6,name:{ky:'Таш Рабат',ru:'Таш Рабат',en:'Tash Rabat'},
+   type:{ky:'Байыркы карван сарай',ru:'Древний каравансарай',en:'Ancient Caravanserai'},region:'Нарын',emoji:'🕌',
+   photo:'images/places/tashrabat.jpg',
    coords:{lat:40.8311,lng:75.2167},
-   desc:{ky:'X-XI кылымдагы таштан курулган карван сарай. Денгели-Таш өрөөнүндө, деңиз деңгелинен 3200 м бийиктикте. Шелк Жолунун тарыхый жолундагы маанилүү жай. 31 бөлмө, чиркей.',
-         ru:'Каравансарай X-XI вв., сложенный из камня. В долине Денгели-Таш, на высоте 3200 м. Важная стоянка на историческом Шёлковом пути. 31 комната, мечеть.',
-         en:'10th-11th century stone caravanserai. Located in Dengeli-Tash valley, 3200m altitude. Important stop on the historical Silk Road. 31 rooms, mosque.'},
-   legend:{ky:'Карван сарай бир түнөктө курулган деген уламыш бар. Пери-пайылар жардам берген дешет. Байыркы кытай соодагерлери бул жерде алтын жашырышкан.',
-           ru:'Легенда гласит, что каравансарай построили за одну ночь с помощью волшебных существ. Древние китайские купцы прятали здесь золото.',
-           en:'Legend says the caravanserai was built in one night with the help of fairy creatures. Ancient Chinese merchants hid gold here.'},
-   facts:[{ky:'1000 жылдан ашык тарыхы бар',ru:'История более 1000 лет',en:'Over 1000 years of history'},
-          {ky:'Шелк Жолу боюнда эң жакшы сакталган карван сарай',ru:'Лучше всего сохранившийся каравансарай на Шёлковом пути',en:'Best preserved caravanserai on the Silk Road'}]},
-
-  {id:8,name:{ky:'Бурана мунарасы',ru:'Башня Бурана',en:'Burana Tower'},
-   type:{ky:'Байыркы мунара',ru:'Древняя башня',en:'Ancient Tower'},
-   region:'Чүй',emoji:'🗼',
+   desc:{ky:'X-XI кылымдарда таштан курулган карван сарай. Деңиз деңгелинен 3200 метр бийиктикте. 31 бөлмө, мечит жана жашыруун коридорлор бар.',
+         ru:'Каравансарай X-XI вв. из тёсаного камня. Высота 3200 м. 31 комната, мечеть, тайные коридоры.',
+         en:'10-11th century hewn-stone caravanserai. 3200m altitude. 31 rooms, mosque, secret corridors.'},
+   legend:{ky:'Карван сарай бир түнөктө куруп бүткөн деген уламыш бар — пери-пайылар жардам берген.',
+           ru:'Легенда: построен за одну ночь с помощью духов.',
+           en:'Legend: built overnight with help of spirits.'},
+   howto:{ky:'🚘 Нарын шаарынан 120 км. 🚙 4x4 унаа зарыл. ☀️ Жай айларында гана.',
+           ru:'🚘 120 км от Нарына. 🚙 Нужен 4x4. ☀️ Только летом.',
+           en:'🚘 120km from Naryn. 🚙 4x4 needed. ☀️ Summer only.'},
+   facts:[{ky:'Шелк Жолу боюнда эң жакшы сакталган карван сарай',ru:'Лучший из сохранившихся на Шёлковом пути',en:'Best preserved Silk Road caravanserai'}]},
+  {id:7,name:{ky:'Бурана мунарасы',ru:'Башня Бурана',en:'Burana Tower'},
+   type:{ky:'Байыркы мунара',ru:'Древняя башня',en:'Ancient Tower'},region:'Чүй',emoji:'🗼',
+   photo:'images/places/burana.jpg',
    coords:{lat:42.7467,lng:75.2669},
-   desc:{ky:'XI кылымдагы Карахан мамлекетинин мунарасы. Башка бийиктиги 25 м (байыркыда 45 м). Баласагун шаарынын калдыгы. Бишкектен 80 км. Байыркы таш мурустар (балбалдар) сакталган.',
-         ru:'Минарет Карахандского государства XI века. Сохранившаяся высота 25 м (изначально 45 м). Остатки города Баласагун. 80 км от Бишкека. Сохранились древние каменные стелы (балбалы).',
-         en:'11th century Karakhanid state minaret. Preserved height 25m (originally 45m). Remains of Balasagun city. 80km from Bishkek. Ancient stone stelae (balbals) preserved.'},
-   legend:{ky:'Мунарага чыккан адам бакытка ооп жетет деген ишеним бар. Байыркыда мунарага шамдар жагып, жолоочуларга жарык берген. Жусуп Баласагуни ушул жерде туулган.',
-           ru:'Верят, что забравшийся на башню обретёт счастье. В древности на башне зажигали огни для путников. Юсуф Баласагуни родился в этом месте.',
-           en:'Believed that climbing the tower brings happiness. Fires were once lit atop to guide travellers. Yusuf Balasaguni was born in this place.'},
-   facts:[{ky:'Кыргызстандагы эң байыркы архитектура',ru:'Древнейшая архитектура Кыргызстана',en:'Oldest architecture in Kyrgyzstan'},
-          {ky:'Жусуп Баласагуни ушул шаарда туулган',ru:'Юсуф Баласагуни родился в этом городе',en:'Yusuf Balasaguni was born in this city'}]},
+   desc:{ky:'XI кылымдагы Карахан мамлекетинин мунарасы. Бишкектен 80 км. Байыркы Баласагун шаарынын калдыгы.',
+         ru:'Минарет Карахандского каганата XI века. 80 км от Бишкека. Остатки древнего Баласагуна.',
+         en:'11th century Karakhanid minaret. 80km from Bishkek. Ancient Balasagun ruins.'},
+   legend:{ky:'Мунарага чыккан адам бакытка жетет деген ишеним бар.',
+           ru:'Поднявшийся на башню обретёт счастье.',
+           en:'Climbing brings happiness.'},
+   howto:{ky:'🚌 Бишкектен Токмокко маршрутка — 1 саат, 100 сом. Токмоктон такси — 300-400 сом. Кириш акысы — 100 сом.',
+           ru:'🚌 Из Бишкека до Токмока — 1 час, 100 сом. Из Токмока такси — 300-400 сом. Вход — 100 сом.',
+           en:'🚌 Bishkek to Tokmok — 1 hr, 100 som. Tokmok taxi — 300-400 som. Entry — 100 som.'},
+   facts:[{ky:'Кыргызстандагы эң байыркы архитектуралык эстелик',ru:'Древнейший архитектурный памятник Кыргызстана',en:'Oldest architectural monument in Kyrgyzstan'}]},
 ];
 
 var persons=[
-  {id:0,name:'Манас Баатыр',
-   img:'images/Manas.jpg',
+  {id:0,name:'Манас Баатыр',img:'images/Manas.jpg',
    role:{ky:'Баатыр, Эпос Каарманы',ru:'Богатырь, Герой эпоса',en:'Hero, Epic Character'},
-   period:{ky:'IX кылым',ru:'IX век',en:'9th century'},
-   cat:'baatyr',emoji:'⚔️',
-   bio:{ky:'Улуу кыргыз эпосунун баш каарманы. 500 000 сап эпос — дүйнөдөгү эң узун эпостордун бири. 2009-жылы ЮНЕСКО Адамзаттын Материалдык Эмес Маданий Мурасынын Тизмесине кирди. Манас кыргыз уруулурун бириктирип, Ала-Тоону мекен тутунган. Анын ажалсыз аты Аккула, жары Каныкей. Манасиада — 4 жылда бир өтүүчү сынак.',
-        ru:'Главный герой великого кыргызского эпоса. 500 000 строк — один из длиннейших эпосов мира. В 2009 году включён в список ЮНЕСКО. Манас объединил кыргызские племена. Его легендарный конь Аккула, жена Каныкей.',
-        en:'Main hero of the great Kyrgyz epic. 500,000 lines — one of the longest epics in the world. Listed by UNESCO in 2009. Manas united the Kyrgyz tribes. His legendary horse was Akkula, wife Kanykei.'},
-   quotes:[{ky:'Адамдын эң чоң байлыгы — эли менен бирдигинде.',ru:'Главное богатство человека — единство с народом.',en:'A person\'s greatest wealth is unity with their people.'},
-           {ky:'Биригип алсак — биз жеңебиз, бытырасак — жоголобуз.',ru:'Сплотимся — победим, рассыплемся — погибнем.',en:'United we win, divided we perish.'}],
-   facts:[{ky:'500 000 сап эпос — дүйнөдөгү эң узундардын бири',ru:'500 000 строк — один из длиннейших эпосов мира',en:'500,000 lines — one of the longest epics in the world'},
-          {ky:'Манасчы — эпосту жаттап айтуучу ырчы',ru:'Манасчи — певец, исполняющий эпос наизусть',en:'Manaschi — singer who recites the epic from memory'}]},
-
-  {id:1,name:'Чыңгыз Айтматов',
-  img:'images/Manas-1.jpg',
+   period:{ky:'IX кылым',ru:'IX век',en:'9th century'},cat:'baatyr',emoji:'⚔️',
+   bio:{ky:'Улуу кыргыз эпосунун баш каарманы. 500 000 сап эпос — дүйнөдөгү эң узун эпостордун бири. 2009-жылы ЮНЕСКО Адамзаттын Материалдык Эмес Маданий Мурасынын Тизмесине кирди.',
+        ru:'Главный герой великого кыргызского эпоса. 500 000 строк — один из длиннейших эпосов мира.',
+        en:'Main hero of Kyrgyz epic. 500,000 lines — one of the longest epics. UNESCO listed 2009.'},
+   quotes:[{ky:'Адамдын эң чоң байлыгы — эли менен бирдигинде.',ru:'Главное богатство — единство с народом.',en:'Greatest wealth is unity with people.'},{ky:'Биригип алсак — биз жеңебиз, бытырасак — жоголобуз.',ru:'Сплотимся — победим, рассыплемся — погибнем.',en:'United we win, divided we perish.'}],
+   facts:[{ky:'500 000 сап — дүйнөдөгү эң узун эпостордун бири',ru:'500 000 строк — один из длиннейших',en:'500,000 lines — among the world\'s longest'}]},
+  {id:1,name:'Чыңгыз Айтматов',img:'images/Manas-1.jpg',
    role:{ky:'Жазуучу, Классик',ru:'Писатель, Классик',en:'Writer, Classic'},
-   period:{ky:'1928–2008',ru:'1928–2008',en:'1928–2008'},
-   cat:'writer',emoji:'📖',
-   bio:{ky:'Чыгармалары 170дөн ашуун тилге которулган улуу кыргыз жазуучусу. Ленин сыйлыгынын лауреаты. Кыргызстандын Францияда Германиядагы өкүлү. "Ак кеме", "Гүлсарат", "Кыяматтын акыркы вагону" чыгармалары дүйнөлүк классикасы.',
-        ru:'Великий кыргызский писатель, чьи произведения переведены более чем на 170 языков. Лауреат Ленинской премии. Посол в Франции и Германии. "Белый пароход", "Прощай, Гульсары!", "Буранный полустанок" — мировая классика.',
-        en:'Great Kyrgyz writer whose works are translated into over 170 languages. Lenin Prize laureate. Ambassador to France and Germany. "The White Ship", "Farewell, Gulsary!", "The Day Lasts More Than a Hundred Years" — world classics.'},
-   quotes:[{ky:'Эстебеген адам — тамыры жок дарак.',ru:'Человек без памяти — дерево без корней.',en:'A person without memory is a tree without roots.'},
-           {ky:'Мекен — бул жер эмес, ал — сезим.',ru:'Родина — это не место, это чувство.',en:'Homeland is not a place, it is a feeling.'}],
-   facts:[{ky:'Чыгармалары 170+ тилге которулган',ru:'Произведения переведены на 170+ языков',en:'Works translated into 170+ languages'},
-          {ky:'Советтер убагындагы Кыргызстандын эң белгилүү дипломаты',ru:'Самый известный дипломат Кыргызстана советской эпохи',en:'Most famous diplomat of Soviet-era Kyrgyzstan'}]},
-
-  {id:2,name:'Токтогул Сатылганов',
-  img:'images/Manas-2.webp',
-   role:{ky:'Акын, Ырчы, Комузчу',ru:'Акын, певец, комузист',en:'Poet, Singer, Komuz player'},
-   period:{ky:'1864–1933',ru:'1864–1933',en:'1864–1933'},
-   cat:'akyn',emoji:'🎵',
-   bio:{ky:'Улуу элдик акын жана комузчу. Эркин ойлуулугу үчүн Сибирга сүргүнгө айдалган. Токтогул суу сактагычы анын атына коюлган. Комуздун 3 кылы — 3 дүйнөнү билдирет: жер асты, жер бети, ар бири. Айтыш — кыргыздагы поэтикалык дуэль жанрынын устасы.',
-        ru:'Великий народный акын и комузист. Был сослан в Сибирь за свободолюбие. Токтогульское водохранилище названо в его честь. 3 струны комуза — три мира. Мастер жанра айтыш — поэтической дуэли.',
-        en:'Great folk poet and komuz player. Exiled to Siberia for his free spirit. Toktogul reservoir named after him. 3 komuz strings — 3 worlds. Master of aitush — the art of poetic duel.'},
-   quotes:[{ky:'Комуздун үнүндө бабалардын жаны бар.',ru:'В звуке комуза — душа предков.',en:'In the sound of the komuz lives the soul of ancestors.'},
-           {ky:'Акын болуу — элинин жүрөгүнүн тилин билүү.',ru:'Быть акыном — знать язык сердца народа.',en:'To be an akyn is to know the language of the people\'s heart.'}],
-   facts:[{ky:'Токтогул суу сактагычы анын атына коюлган',ru:'Токтогульское водохранилище названо в его честь',en:'Toktogul reservoir named in his honor'},
-          {ky:'Сибирь сүргүнүнөн кайтып эпикалык ырлар жаратты',ru:'Вернувшись из ссылки, создал эпические произведения',en:'After returning from exile, created epic works'}]},
-
-  {id:3,name:'Курманжан Датка',
-  img:'images/Manas-3.webp',
+   period:{ky:'1928–2008',ru:'1928–2008',en:'1928–2008'},cat:'writer',emoji:'📖',
+   bio:{ky:'Чыгармалары 170дөн ашуун тилге которулган улуу кыргыз жазуучусу. Ленин сыйлыгынын лауреаты.',
+        ru:'Произведения переведены на 170+ языков. Лауреат Ленинской премии.',
+        en:'Works in 170+ languages. Lenin Prize laureate.'},
+   quotes:[{ky:'Эстебеген адам — тамыры жок дарак.',ru:'Человек без памяти — дерево без корней.',en:'A person without memory is a tree without roots.'}],
+   facts:[{ky:'Чыгармалары 170+ тилге которулган',ru:'Переведён на 170+ языков',en:'Translated into 170+ languages'}]},
+  {id:2,name:'Токтогул Сатылганов',img:'images/Manas-2.webp',
+   role:{ky:'Акын, Ырчы, Комузчу',ru:'Акын, певец, комузист',en:'Poet, Singer, Komuz Player'},
+   period:{ky:'1864–1933',ru:'1864–1933',en:'1864–1933'},cat:'akyn',emoji:'🎵',
+   bio:{ky:'Улуу элдик акын жана комузчу. Эркин ойлуулугу үчүн Сибирга сүргүнгө айдалган (1898-1910).',
+        ru:'Великий народный акын и комузист. Сослан в Сибирь (1898-1910) за свободолюбие.',
+        en:'Great folk poet and komuz player. Exiled to Siberia (1898-1910) for free spirit.'},
+   quotes:[{ky:'Комуздун үнүндө бабалардын жаны бар.',ru:'В звуке комуза — душа предков.',en:'In komuz sound lives the soul of ancestors.'}],
+   facts:[{ky:'Токтогул суу сактагычы анын атына коюлган (1975)',ru:'Водохранилище названо в честь него (1975)',en:'Reservoir named after him (1975)'}]},
+  {id:3,name:'Курманжан Датка',img:'images/Manas-3.webp',
    role:{ky:'Саясатчы, Ханыша',ru:'Политик, Царица',en:'Politician, Queen'},
-   period:{ky:'1811–1907',ru:'1811–1907',en:'1811–1907'},
-   cat:'politic',emoji:'👸',
-   bio:{ky:'Алай ханышасы. Кыргыз элин 50 жылдан ашык башкарган. Орустар аны "Алай ханышасы" деп аташкан. Элин сактоо үчүн уулун орус сотуна тапшырган. Оруссиянын Императрицасы Александра аны кабыл алган. Кыргыз тарыхындагы эң таасирдүү аял.',
-        ru:'Алайская царица. Правила кыргызским народом более 50 лет. Русские называли её "Алайская царица". Отдала сына на суд русских, чтобы спасти народ. Принята Императрицей Александрой. Самая влиятельная женщина в кыргызской истории.',
-        en:'Queen of Alai. Ruled the Kyrgyz people for over 50 years. Russians called her the "Alai Queen". Surrendered her son to Russian courts to save her people. Received by Empress Alexandra. Most influential woman in Kyrgyz history.'},
-   quotes:[{ky:'Элимдин намысы менин намысым.',ru:'Честь народа — моя честь.',en:'The honor of my people is my honor.'},
-           {ky:'Эр жигит өлгүнчө согушат, биз болсо жашоо үчүн согушабыз.',ru:'Мужчины воюют до смерти, мы воюем ради жизни.',en:'Men fight until death; we fight for life.'}],
-   facts:[{ky:'Алай өрөөнүн 50 жылдан ашык башкарган',ru:'Правила Алайской долиной более 50 лет',en:'Ruled Alai Valley for over 50 years'},
-          {ky:'Кыргызстанда банкнотадагы жалгыз аял',ru:'Единственная женщина на банкноте Кыргызстана',en:'Only woman featured on Kyrgyz banknotes'}]},
-
-  {id:4,name:'Жусуп Баласагун',
-  img:'images/Manas-4.webp',
+   period:{ky:'1811–1907',ru:'1811–1907',en:'1811–1907'},cat:'politic',emoji:'👸',
+   bio:{ky:'Алай ханышасы — кыргыз тарыхындагы эң таасирдүү аял. Кыргыз элин 50 жылдан ашык башкарган. 500 сомдук банкноттодо сүрөттөлгөн.',
+        ru:'Алайская царица — самая влиятельная женщина кыргызской истории. Правила 50+ лет.',
+        en:'Queen of Alai — most influential woman in Kyrgyz history. Ruled 50+ years.'},
+   quotes:[{ky:'Элимдин намысы менин намысым.',ru:'Честь народа — моя честь.',en:'The honor of my people is my honor.'}],
+   facts:[{ky:'500 сомдук банкнотто — жалгыз аял',ru:'500-сомовая банкнота — единственная женщина',en:'500 som note — only woman'}]},
+  {id:4,name:'Жусуп Баласагун',img:'images/Manas-4.webp',
    role:{ky:'Акын, Философ',ru:'Поэт, Философ',en:'Poet, Philosopher'},
-   period:{ky:'1019–1085',ru:'1019–1085',en:'1019–1085'},
-   cat:'writer',emoji:'📜',
-   bio:{ky:'"Куттуу Билим" ("Кутадгу Билиг") дастанынын автору. 6520 саптан турган философиялык поэма. Бакыт, адилеттик, акыл-эс жана жашоо жөнүндө. Баласагун шаарынан (азыркы Кыргызстан). XI кылымдагы ислам дүйнөсүнүн эң чоң акыны.',
-        ru:'Автор поэмы "Кутадгу Билиг" ("Благодатное знание"). Философская поэма из 6520 строк. О счастье, справедливости, разуме и жизни. Из города Баласагун (современный Кыргызстан). Крупнейший поэт исламского мира XI века.',
-        en:'Author of "Kutadgu Bilig" ("Wisdom of Royal Glory"). Philosophical poem of 6,520 lines. About happiness, justice, reason and life. From Balasagun city (modern Kyrgyzstan). Greatest poet of the Islamic world in the 11th century.'},
-   quotes:[{ky:'Билим — байлыктын эң улуусу.',ru:'Знание — высшее из богатств.',en:'Knowledge is the greatest of all wealth.'},
-           {ky:'Акылдуу адам оозун ачканча ойлонот.',ru:'Умный человек думает, прежде чем открыть рот.',en:'A wise person thinks before opening their mouth.'}],
-   facts:[{ky:'"Куттуу Билим" — XI кылымдагы философиялык чедеври',ru:'"Кутадгу Билиг" — философский шедевр XI века',en:'"Kutadgu Bilig" — an 11th century philosophical masterpiece'},
-          {ky:'Орто Азиядагы эң алгачкы сакталган адабий эстелик',ru:'Первый сохранившийся литературный памятник Средней Азии',en:'First preserved literary monument of Central Asia'}]},
-
-  {id:5,name:'Барсбек Каган',
-  img:'images/Manas-5.webp',
+   period:{ky:'1019–1085',ru:'1019–1085',en:'1019–1085'},cat:'writer',emoji:'📜',
+   bio:{ky:'"Куттуу Билим" дастанынын автору. 6520 саптан турган философиялык поэма.',
+        ru:'Автор "Кутадгу Билиг". 6520 строк о счастье, справедливости.',
+        en:'Author of "Kutadgu Bilig". 6,520 lines on happiness, justice.'},
+   quotes:[{ky:'Билим — байлыктын эң улуусу.',ru:'Знание — высшее из богатств.',en:'Knowledge is the greatest wealth.'}],
+   facts:[{ky:'"Куттуу Билим" — дүйнөлүк маданияттын шедеври',ru:'"Кутадгу Билиг" — шедевр мировой культуры',en:'"Kutadgu Bilig" — world cultural masterpiece'}]},
+  {id:5,name:'Барсбек Каган',img:'images/Manas-5.webp',
    role:{ky:'Каган, Мамлекет Башчысы',ru:'Каган, Глава государства',en:'Khagan, Head of State'},
-   period:{ky:'VII–VIII кылым',ru:'VII–VIII век',en:'7th-8th century'},
-   cat:'politic',emoji:'👑',
-   bio:{ky:'Кыргыз кагандыгынын каганы. Кыргыздарды Борбордук Азиянын күчтүү мамлекетине айландырган. Экинчи Түрк кагандыгын жеңген. 711-жылдагы сугышта Капаган Каганды жеңген. Кыргыздардын алтын доорун башкарган.',
-        ru:'Каган Кыргызского каганата. Превратил кыргызов в мощное государство Центральной Азии. Победил Второй Тюркский каганат. В 711 году победил Капагана. Правил золотым веком кыргызов.',
-        en:'Khagan of the Kyrgyz Khaganate. Made Kyrgyz a powerful Central Asian state. Defeated the Second Turkic Khaganate. Defeated Kapagan in 711. Ruled the golden age of the Kyrgyz.'},
-   quotes:[{ky:'Биз — тоолордун урпагыбыз, асмандын балдарыбыз.',ru:'Мы — потомки гор, дети неба.',en:'We are the descendants of mountains, children of the sky.'}],
-   facts:[{ky:'Кыргыз кагандыгы Борбордук Азиянын гегемону болгон',ru:'Кыргызский каганат стал гегемоном Центральной Азии',en:'Kyrgyz Khaganate became the hegemon of Central Asia'},
-          {ky:'Орхон ташбасма жазмаларында аты айтылат',ru:'Упоминается в орхонских рунических надписях',en:'Mentioned in the Orkhon runic inscriptions'}]},
-
-  {id:6,name:'Манас Хан Алымбеков',
-  img:'images/Manas',
-   role:{ky:'Аскер, Башчы',ru:'Военачальник',en:'Military Commander'},
-   period:{ky:'XVIII кылым',ru:'XVIII век',en:'18th century'},
-   cat:'baatyr',emoji:'🏇',
-   bio:{ky:'XVIII кылымдагы кыргыз баатыры. Жоңгар баскынчыларына каршы күрөшкөн. Кыргыз уруулурун бириктирген. Ферганадан Таласка чейин аймакты коргогон. Элдик дастандардын каарманы.',
-        ru:'Кыргызский богатырь XVIII века. Воевал против джунгарских захватчиков. Объединил кыргызские племена. Защищал территорию от Ферганы до Таласа. Герой народных дастанов.',
-        en:'Kyrgyz warrior of the 18th century. Fought against Dzungar invaders. United Kyrgyz tribes. Protected territory from Fergana to Talas. Hero of folk dastans.'},
-   quotes:[{ky:'Баатыр өлбөйт — анын иши гана өлбөйт.',ru:'Богатырь не умирает — лишь его дело не умирает.',en:'A warrior does not die — only his deeds live on.'}],
-   facts:[{ky:'Жоңгар баскынчыларына каршы биргикте 1709-1760 жж',ru:'Борьба с джунгарами продолжалась 1709-1760 гг',en:'The fight against Dzungars lasted 1709-1760'},
-          {ky:'Эл оозеки чыгармачылыгынын каарманы',ru:'Герой устного народного творчества',en:'Hero of oral folk literature'}]},
-
-  {id:7,name:'Тоголок Молдо',
-  img:'images/Manas-6.webp',
+   period:{ky:'VII–VIII кылым',ru:'VII–VIII век',en:'7th-8th century'},cat:'politic',emoji:'👑',
+   bio:{ky:'Кыргыз кагандыгынын каганы. Кыргыздарды Борбордук Азиянын күчтүү мамлекетине айландырган.',
+        ru:'Каган Кыргызского каганата. Превратил кыргызов в мощное государство.',
+        en:'Khagan of Kyrgyz Khaganate. Made Kyrgyz a powerful state.'},
+   quotes:[{ky:'Биз — тоолордун урпагыбыз, асмандын балдарыбыз.',ru:'Мы — потомки гор, дети неба.',en:'We are descendants of mountains, children of sky.'}],
+   facts:[{ky:'711-жылы Экинчи Түрк кагандыгын талкалаган',ru:'В 711 году разгромил Второй Тюркский каганат',en:'In 711 destroyed the Second Turkic Khaganate'}]},
+  {id:6,name:'Тоголок Молдо',img:'images/Manas-6.webp',
    role:{ky:'Акын, Манасчы',ru:'Акын, Манасчи',en:'Akyn, Manaschi'},
-   period:{ky:'1860–1942',ru:'1860–1942',en:'1860–1942'},
-   cat:'akyn',emoji:'🎤',
-   bio:{ky:'Улуу кыргыз акыны жана манасчы. Манасты жаттан айткан. Байыркы кыргыз салт-санааларын сактап калган. Советтер убагында кыргыз адабиятынын негиздөөчүсүнүн бири. 700дөн ашык ыр жазган.',
-        ru:'Великий кыргызский акын и манасчи. Исполнял Манас наизусть. Сохранил древние кыргызские обычаи. Один из основателей кыргызской литературы советского периода. Написал более 700 стихотворений.',
-        en:'Great Kyrgyz akyn and manaschi. Performed Manas from memory. Preserved ancient Kyrgyz customs. One of the founders of Kyrgyz literature of the Soviet era. Wrote over 700 poems.'},
-   quotes:[{ky:'Ыр — элдин жаны, журттун тили.',ru:'Песня — душа народа, язык страны.',en:'Song is the soul of the people, the language of the land.'}],
-   facts:[{ky:'700дөн ашык ыр жазган',ru:'Написал более 700 стихотворений',en:'Wrote over 700 poems'},
-          {ky:'Манас эпосунун маанилүү варианттарынын бири анын варианты',ru:'Его вариант — один из ключевых вариантов эпоса Манас',en:'His version is one of the key variants of the Manas epic'}]},
-
-  {id:8,name:'Исхак Раззаков',
-  img:'images/Manas-7.webp',
+   period:{ky:'1860–1942',ru:'1860–1942',en:'1860–1942'},cat:'akyn',emoji:'🎤',
+   bio:{ky:'Улуу кыргыз акыны жана манасчы. Советтер убагында кыргыз адабиятынын негиздөөчүлөрүнүн бири.',
+        ru:'Великий кыргызский акын и манасчи. Один из основателей советской кыргызской литературы.',
+        en:'Great Kyrgyz akyn and manaschi. Co-founder of Soviet Kyrgyz literature.'},
+   quotes:[{ky:'Ыр — элдин жаны, журттун тили.',ru:'Песня — душа народа, язык страны.',en:'Song is the soul of people, language of the land.'}],
+   facts:[{ky:'700дөн ашык ыр жазган',ru:'Написал 700+ стихотворений',en:'Wrote 700+ poems'}]},
+  {id:7,name:'Исхак Раззаков',img:'images/Manas-7.webp',
    role:{ky:'Мамлекет башчысы',ru:'Государственный деятель',en:'Head of State'},
-   period:{ky:'1910–1979',ru:'1910–1979',en:'1910–1979'},
-   cat:'politic',emoji:'🏛',
-   bio:{ky:'Кыргыз ССРинин биринчи кыргыз башчысы. 1945-1961-жылдары Кыргызстанды башкарган. Орус-кыргыз мамлекеттик университети (КНУ) анын убагында ачылган. Кыргызстандын өнүгүүсүнө зор салым кошкон.',
-        ru:'Первый кыргызский руководитель Кыргызской ССР. Руководил Кыргызстаном в 1945-1961 годах. При нём открылся Кыргызский национальный университет. Внёс огромный вклад в развитие Кыргызстана.',
-        en:'First Kyrgyz leader of the Kyrgyz SSR. Led Kyrgyzstan from 1945 to 1961. The Kyrgyz National University opened during his tenure. Made enormous contributions to Kyrgyzstan\'s development.'},
+   period:{ky:'1910–1979',ru:'1910–1979',en:'1910–1979'},cat:'politic',emoji:'🏛',
+   bio:{ky:'Кыргыз ССРинин биринчи кыргыз башчысы. 1945-1961-жылдары Кыргызстанды башкарган.',
+        ru:'Первый кыргызский руководитель Кыргызской ССР. Руководил 1945-1961.',
+        en:'First Kyrgyz leader of Kyrgyz SSR. Led 1945-1961.'},
    quotes:[{ky:'Элдин бакыты — менин бакытым.',ru:'Счастье народа — моё счастье.',en:'The happiness of the people is my happiness.'}],
-   facts:[{ky:'КНУ анын убагында ачылган',ru:'КНУ открылся при его правлении',en:'KNU opened during his rule'},
-          {ky:'1945-1961 Кыргыз ССРин башкарган',ru:'Руководил Кыргызской ССР 1945-1961',en:'Led Kyrgyz SSR 1945-1961'}]},
+   facts:[{ky:'КНУ (Кыргыз Улуттук Университети) анын убагында ачылган',ru:'КНУ открылся при его правлении',en:'KNU opened during his rule'}]},
 ];
 
 var animals=[
-  {name:{ky:'Чычкан',ru:'Крыса',en:'Rat'},emoji:'🐭',
-   years:[1948,1960,1972,1984,1996,2008,2020,2032],
-   traits:{ky:['Акылдуу','Иштеткен','Ийгиликтүү'],ru:['Умный','Трудолюбивый','Успешный'],en:['Smart','Hardworking','Successful']},
-   prophecy:{ky:'Акылдуу жана ийгиликтүү болот. Максатка жетүүдө өзгөчө чеберлик.',ru:'Умный и успешный. Особое мастерство в достижении целей.',en:'Smart and successful. Special skill in achieving goals.'}},
-  {name:{ky:'Уй',ru:'Бык',en:'Ox'},emoji:'🐂',
-   years:[1949,1961,1973,1985,1997,2009,2021,2033],
-   traits:{ky:['Чыдамдуу','Эмгекчил','Ишенимдүү'],ru:['Терпеливый','Трудолюбивый','Надёжный'],en:['Patient','Hardworking','Reliable']},
-   prophecy:{ky:'Чыдамдуу жана эмгекчил. Туруктуулуктун символу.',ru:'Терпеливый и трудолюбивый. Символ стабильности.',en:'Patient and hardworking. A symbol of stability.'}},
-  {name:{ky:'Жолборс',ru:'Тигр',en:'Tiger'},emoji:'🐯',
-   years:[1950,1962,1974,1986,1998,2010,2022,2034],
-   traits:{ky:['Эр жүрөк','Күчтүү','Жетекчи'],ru:['Храбрый','Сильный','Лидер'],en:['Brave','Strong','Leader']},
-   prophecy:{ky:'Баатыр жана жеңүүчү. Жетекчиликке жараталган.',ru:'Храбрый победитель. Рождён для лидерства.',en:'Brave victor. Born for leadership.'}},
-  {name:{ky:'Коён',ru:'Кролик',en:'Rabbit'},emoji:'🐰',
-   years:[1951,1963,1975,1987,1999,2011,2023,2035],
-   traits:{ky:['Жумшак','Бактылуу','Сабырдуу'],ru:['Мягкий','Счастливый','Терпеливый'],en:['Gentle','Lucky','Patient']},
-   prophecy:{ky:'Бактылуу жана бейпил. Сулуулукту баалайт.',ru:'Счастливый и мирный. Ценит красоту.',en:'Lucky and peaceful. Appreciates beauty.'}},
-  {name:{ky:'Уулу',ru:'Дракон',en:'Dragon'},emoji:'🐉',
-   years:[1952,1964,1976,1988,2000,2012,2024,2036],
-   traits:{ky:['Күчтүү','Жаратман','Улуу'],ru:['Сильный','Творческий','Великий'],en:['Strong','Creative','Great']},
-   prophecy:{ky:'Күчтүү жана таланттуу. Улуу иштерге жараталган.',ru:'Сильный и талантливый. Создан для великих дел.',en:'Strong and talented. Created for great things.'}},
-  {name:{ky:'Жылан',ru:'Змея',en:'Snake'},emoji:'🐍',
-   years:[1953,1965,1977,1989,2001,2013,2025,2037],
-   traits:{ky:['Акылман','Сырдуу','Терең'],ru:['Мудрый','Таинственный','Глубокий'],en:['Wise','Mysterious','Deep']},
-   prophecy:{ky:'Акылман жана терең ойлонуучу. Сырларды сакта.',ru:'Мудрый глубокомысленный. Хранитель тайн.',en:'Wise deep thinker. Keeper of secrets.'}},
-  {name:{ky:'Жылкы',ru:'Лошадь',en:'Horse'},emoji:'🐎',
-   years:[1954,1966,1978,1990,2002,2014,2026,2038],
-   traits:{ky:['Эркин','Энергиялуу','Баатыр'],ru:['Свободный','Энергичный','Смелый'],en:['Free','Energetic','Brave']},
-   prophecy:{ky:'2026 — Жылкы жылы! Эркин жана жигердүү. Сапар жана жаңы башталыш.',ru:'2026 — Год Лошади! Свободный и энергичный. Путешествия и новые начинания.',en:'2026 — Year of the Horse! Free and energetic. Travel and new beginnings.'}},
-  {name:{ky:'Кой',ru:'Овца',en:'Sheep'},emoji:'🐑',
-   years:[1955,1967,1979,1991,2003,2015,2027,2039],
-   traits:{ky:['Жакшы жүрөктүү','Чыгармачыл','Мейиримдүү'],ru:['Добросердечный','Творческий','Добрый'],en:['Kind-hearted','Creative','Caring']},
-   prophecy:{ky:'Жакшы жүрөктүү жана чыгармачыл. Сулуулукту жаратат.',ru:'Добросердечный и творческий. Создаёт красоту.',en:'Kind-hearted and creative. Creates beauty.'}},
-  {name:{ky:'Маймыл',ru:'Обезьяна',en:'Monkey'},emoji:'🐒',
-   years:[1956,1968,1980,1992,2004,2016,2028,2040],
-   traits:{ky:['Зирек','Ойноокой','Акылдуу'],ru:['Ловкий','Игривый','Умный'],en:['Agile','Playful','Smart']},
-   prophecy:{ky:'Зирек жана кызыктуу. Ар дайым жаңылыктарды издейт.',ru:'Ловкий и интересный. Всегда ищет новое.',en:'Agile and interesting. Always seeking novelty.'}},
-  {name:{ky:'Тоок',ru:'Петух',en:'Rooster'},emoji:'🐓',
-   years:[1957,1969,1981,1993,2005,2017,2029,2041],
-   traits:{ky:['Тик сөзчүл','Иштеткен','Жоопкерчиликтүү'],ru:['Прямолинейный','Трудолюбивый','Ответственный'],en:['Straightforward','Hardworking','Responsible']},
-   prophecy:{ky:'Тик сөзчүл жана иштеткен. Тартипти сүйөт.',ru:'Прямолинейный и трудолюбивый. Любит порядок.',en:'Straightforward and hardworking. Loves order.'}},
-  {name:{ky:'Ит',ru:'Собака',en:'Dog'},emoji:'🐕',
-   years:[1958,1970,1982,1994,2006,2018,2030,2042],
-   traits:{ky:['Ишенимдүү','Адал','Берилген'],ru:['Надёжный','Честный','Преданный'],en:['Reliable','Honest','Loyal']},
-   prophecy:{ky:'Ишенимдүү жана адал. Достугу бекем жана берилген.',ru:'Надёжный и честный. Крепкая дружба и преданность.',en:'Reliable and honest. Strong friendship and loyalty.'}},
-  {name:{ky:'Доңуз',ru:'Кабан',en:'Pig'},emoji:'🐗',
-   years:[1959,1971,1983,1995,2007,2019,2031,2043],
-   traits:{ky:['Жомарт','Мейиримдүү','Намыскер'],ru:['Щедрый','Добрый','Честный'],en:['Generous','Kind','Honorable']},
-   prophecy:{ky:'Жомарт жана мейиримдүү. Достору үчүн баарын жасайт.',ru:'Щедрый и добрый. Делает всё для друзей.',en:'Generous and kind. Does everything for friends.'}},
+  {name:{ky:'Чычкан',ru:'Крыса',en:'Rat'},emoji:'🐭',years:[1948,1960,1972,1984,1996,2008,2020,2032],traits:{ky:['Акылдуу','Иштеткен','Ийгиликтүү'],ru:['Умный','Трудолюбивый','Успешный'],en:['Smart','Hardworking','Successful']},prophecy:{ky:'Акылдуу жана ийгиликтүү. Максатка жетүүдө өзгөчө чеберлик.',ru:'Умный и успешный.',en:'Smart and successful.'}},
+  {name:{ky:'Уй',ru:'Бык',en:'Ox'},emoji:'🐂',years:[1949,1961,1973,1985,1997,2009,2021,2033],traits:{ky:['Чыдамдуу','Эмгекчил','Ишенимдүү'],ru:['Терпеливый','Трудолюбивый','Надёжный'],en:['Patient','Hardworking','Reliable']},prophecy:{ky:'Чыдамдуу жана эмгекчил.',ru:'Терпеливый и трудолюбивый.',en:'Patient and hardworking.'}},
+  {name:{ky:'Жолборс',ru:'Тигр',en:'Tiger'},emoji:'🐯',years:[1950,1962,1974,1986,1998,2010,2022,2034],traits:{ky:['Эр жүрөк','Күчтүү','Жетекчи'],ru:['Храбрый','Сильный','Лидер'],en:['Brave','Strong','Leader']},prophecy:{ky:'Баатыр жана жеңүүчү.',ru:'Храбрый победитель.',en:'Brave victor.'}},
+  {name:{ky:'Коён',ru:'Кролик',en:'Rabbit'},emoji:'🐰',years:[1951,1963,1975,1987,1999,2011,2023,2035],traits:{ky:['Жумшак','Бактылуу','Сабырдуу'],ru:['Мягкий','Счастливый','Терпеливый'],en:['Gentle','Lucky','Patient']},prophecy:{ky:'Бактылуу жана бейпил.',ru:'Счастливый и мирный.',en:'Lucky and peaceful.'}},
+  {name:{ky:'Уулу',ru:'Дракон',en:'Dragon'},emoji:'🐉',years:[1952,1964,1976,1988,2000,2012,2024,2036],traits:{ky:['Күчтүү','Жаратман','Улуу'],ru:['Сильный','Творческий','Великий'],en:['Strong','Creative','Great']},prophecy:{ky:'Күчтүү жана таланттуу.',ru:'Сильный и талантливый.',en:'Strong and talented.'}},
+  {name:{ky:'Жылан',ru:'Змея',en:'Snake'},emoji:'🐍',years:[1953,1965,1977,1989,2001,2013,2025,2037],traits:{ky:['Акылман','Сырдуу','Терең'],ru:['Мудрый','Таинственный','Глубокий'],en:['Wise','Mysterious','Deep']},prophecy:{ky:'Акылман жана терең ойлонуучу.',ru:'Мудрый глубокомысленный.',en:'Wise deep thinker.'}},
+  {name:{ky:'Жылкы',ru:'Лошадь',en:'Horse'},emoji:'🐎',years:[1954,1966,1978,1990,2002,2014,2026,2038],traits:{ky:['Эркин','Энергиялуу','Баатыр'],ru:['Свободный','Энергичный','Смелый'],en:['Free','Energetic','Brave']},prophecy:{ky:'2026 — Жылкы жылы! Эркин жана жигердүү.',ru:'2026 — Год Лошади! Свободный и энергичный.',en:'2026 — Year of Horse! Free and energetic.'}},
+  {name:{ky:'Кой',ru:'Овца',en:'Sheep'},emoji:'🐑',years:[1955,1967,1979,1991,2003,2015,2027,2039],traits:{ky:['Жакшы жүрөктүү','Чыгармачыл','Мейиримдүү'],ru:['Добросердечный','Творческий','Добрый'],en:['Kind-hearted','Creative','Caring']},prophecy:{ky:'Жакшы жүрөктүү жана чыгармачыл.',ru:'Добросердечный и творческий.',en:'Kind-hearted and creative.'}},
+  {name:{ky:'Маймыл',ru:'Обезьяна',en:'Monkey'},emoji:'🐒',years:[1956,1968,1980,1992,2004,2016,2028,2040],traits:{ky:['Зирек','Ойноокой','Акылдуу'],ru:['Ловкий','Игривый','Умный'],en:['Agile','Playful','Smart']},prophecy:{ky:'Зирек жана кызыктуу.',ru:'Ловкий и интересный.',en:'Agile and interesting.'}},
+  {name:{ky:'Тоок',ru:'Петух',en:'Rooster'},emoji:'🐓',years:[1957,1969,1981,1993,2005,2017,2029,2041],traits:{ky:['Тик сөзчүл','Иштеткен','Жоопкерчиликтүү'],ru:['Прямолинейный','Трудолюбивый','Ответственный'],en:['Straightforward','Hardworking','Responsible']},prophecy:{ky:'Тик сөзчүл жана иштеткен.',ru:'Прямолинейный и трудолюбивый.',en:'Straightforward and hardworking.'}},
+  {name:{ky:'Ит',ru:'Собака',en:'Dog'},emoji:'🐕',years:[1958,1970,1982,1994,2006,2018,2030,2042],traits:{ky:['Ишенимдүү','Адал','Берилген'],ru:['Надёжный','Честный','Преданный'],en:['Reliable','Honest','Loyal']},prophecy:{ky:'Ишенимдүү жана берилген.',ru:'Надёжный и преданный.',en:'Reliable and loyal.'}},
+  {name:{ky:'Доңуз',ru:'Кабан',en:'Pig'},emoji:'🐗',years:[1959,1971,1983,1995,2007,2019,2031,2043],traits:{ky:['Жомарт','Мейиримдүү','Намыскер'],ru:['Щедрый','Добрый','Честный'],en:['Generous','Kind','Honorable']},prophecy:{ky:'Жомарт жана мейиримдүү.',ru:'Щедрый и добрый.',en:'Generous and kind.'}},
 ];
 
 var months=[
-  {kg:'Үчтүн айы',ru:'Январь',en:'January',origin:{ky:'Эң суук ай. Мал коодо. Жылдын башы.',ru:'Самый холодный месяц. Скот в стойле.',en:'Coldest month. Livestock in stalls.'},
-   holidays:[{d:1,name:{ky:'Жаңы Жыл',ru:'Новый год',en:'New Year'},emoji:'🎆'},{d:7,name:{ky:'Православ Рождество',ru:'Православное Рождество',en:'Orthodox Christmas'},emoji:'⛪'}]},
-  {kg:'Бирдин айы',ru:'Февраль',en:'February',origin:{ky:'Биринчи козулар туулат. Жаз белгилери.',ru:'Первые ягнята. Признаки весны.',en:'First lambs born. Signs of spring.'},
-   holidays:[{d:23,name:{ky:'Мекенди коргоочулар күнү',ru:'День защитника Отечества',en:'Defenders Day'},emoji:'⚔️'}]},
-  {kg:'Жалган Куран',ru:'Март',en:'March',origin:{ky:'Жалган жылуулук. Кар жана жаз алмашат. Нооруз!',ru:'Ложное тепло. Чередование снега и весны. Нооруз!',en:'False warmth. Snow and spring alternate. Nooruz!'},
-   holidays:[{d:8,name:{ky:'Аялдардын эл аралык күнү',ru:'Международный женский день',en:"International Women's Day"},emoji:'🌹'},{d:21,name:{ky:'Нооруз — Жаңы Жыл',ru:'Навруз — Новый год',en:'Nooruz — New Year'},emoji:'🌸'}]},
-  {kg:'Чын Куран',ru:'Апрель',en:'April',origin:{ky:'Чыныгы жылуулук. Мал жайытка чыгат. Жер жашарат.',ru:'Настоящее тепло. Скот выходит на пастбища. Земля зеленеет.',en:'True warmth. Livestock go to pastures. Earth turns green.'},
-   holidays:[]},
-  {kg:'Бугу',ru:'Май',en:'May',origin:{ky:'Бугунун айы. Жайлоо башталат. Биринчи казан.',ru:'Месяц марала. Начало джайлоо. Первый котёл.',en:'Month of deer. Jailoo season begins. First cauldron.'},
-   holidays:[{d:1,name:{ky:'Эмгек күнү',ru:'День труда',en:'Labour Day'},emoji:'🌷'},{d:5,name:{ky:'Кыргыз Республикасынын Конституциясы күнү',ru:'День Конституции КР',en:'Constitution Day of KR'},emoji:'📜'}]},
-  {kg:'Кулжа',ru:'Июнь',en:'June',origin:{ky:'Тоо текесинин айы. Жай чоку. Жайлоо жашоосу.',ru:'Месяц тау-тека. Разгар лета. Жизнь на джайлоо.',en:'Month of ibex. Peak of summer. Jailoo life.'},
-   holidays:[{d:1,name:{ky:'Балдарды коргоо күнү',ru:'День защиты детей',en:"Children's Day"},emoji:'🧒'}]},
-  {kg:'Теке',ru:'Июль',en:'July',origin:{ky:'Жай чоку. Той жана оюндар. Кымыз жана эт.',ru:'Разгар лета. Свадьбы и игры. Кумыс и мясо.',en:'Peak of summer. Weddings and games. Kumys and meat.'},
-   holidays:[]},
-  {kg:'Баш Оона',ru:'Август',en:'August',origin:{ky:'Жайлоодон түшүү башталат. Дан жыйналат.',ru:'Начало спуска с джайлоо. Сбор зерна.',en:'Descent from jailoo begins. Grain harvest.'},
-   holidays:[{d:31,name:{ky:'Эгемендүүлүк күнү',ru:'День независимости',en:'Independence Day'},emoji:'🇰🇬'}]},
-  {kg:'Аяк Оона',ru:'Сентябрь',en:'September',origin:{ky:'Жайлоодон түшүү аяктайт. Мектеп башталат.',ru:'Завершение спуска с джайлоо. Начало учёбы.',en:'Jailoo descent ends. School starts.'},
-   holidays:[{d:1,name:{ky:'Билим берүү күнү',ru:'День знаний',en:'Knowledge Day'},emoji:'📚'}]},
-  {kg:'Тогуздун айы',ru:'Октябрь',en:'October',origin:{ky:'Согым убакты. Малды союу башталат.',ru:'Время заготовок. Начало забоя скота.',en:'Preservation time. Livestock slaughter begins.'},
-   holidays:[]},
-  {kg:'Жетинин айы',ru:'Ноябрь',en:'November',origin:{ky:'Кышкы согым. Короо-жай.',ru:'Зимние заготовки. Стойловое содержание.',en:'Winter preparations. Stall keeping.'},
-   holidays:[]},
-  {kg:'Алтынын айы',ru:'Декабрь',en:'December',origin:{ky:'Отко жакын. Жомок айтылат. Жылдын аягы.',ru:'Ближе к огню. Рассказывают сказки. Конец года.',en:'Close to fire. Fairy tales are told. Year\'s end.'},
-   holidays:[{d:31,name:{ky:'Жаңы жылды тосуу',ru:'Встреча Нового года',en:"New Year's Eve"},emoji:'🎆'}]},
+  {kg:'Үчтүн айы',ru:'Январь',en:'January',origin:{ky:'Эң суук ай. Мал коодо.',ru:'Самый холодный. Скот в стойле.',en:'Coldest month.'},
+   holidays:[{d:1,name:{ky:'Жаңы Жыл',ru:'Новый год',en:'New Year'},emoji:'🎆',info:{ky:'Жаңы жыл — дүйнөнүн бардык элдери менен бирге белгиленет.',ru:'Новый год отмечается со всем миром.',en:'New Year with the world.'}},{d:7,name:{ky:'Православ Рождество',ru:'Православное Рождество',en:'Orthodox Christmas'},emoji:'⛪',info:{ky:'Православ христиандар Исус Христостун туулушун белгилешет.',ru:'Православные христиане отмечают рождение Христа.',en:'Orthodox Christians celebrate Christ birth.'}}]},
+  {kg:'Бирдин айы',ru:'Февраль',en:'February',origin:{ky:'Биринчи козулар туулат.',ru:'Первые ягнята.',en:'First lambs.'},
+   holidays:[{d:23,name:{ky:'Мекенди коргоочулар күнү',ru:'День защитника Отечества',en:'Defenders Day'},emoji:'⚔️',info:{ky:'Аскер кызматчыларды урматтаган майрам.',ru:'Праздник в честь военных.',en:'Honors military and defenders.'}}]},
+  {kg:'Жалган Куран',ru:'Март',en:'March',origin:{ky:'Жалган жылуулук. Нооруз!',ru:'Ложное тепло. Нооруз!',en:'False warmth. Nooruz!'},
+   holidays:[{d:8,name:{ky:'Аялдардын эл аралык күнү',ru:'Международный женский день',en:"International Women's Day"},emoji:'🌹',info:{ky:'Аялдардын укуктары жана теңдиги үчүн күрөшүн белгиленет.',ru:'Международный праздник за права женщин.',en:'International day for women rights.'}},{d:21,name:{ky:'Нооруз — Жаңы Жыл',ru:'Навруз — Новый год',en:'Nooruz — New Year'},emoji:'🌸',info:{ky:'Нооруз — жазгы теңелиш майрамы. 3000 жылдык тарых. ЮНЕСКО Адамзаттын Мурасы.',ru:'Нооруз — весеннее равноденствие. 3000-летняя история. Наследие ЮНЕСКО.',en:'Nooruz — spring equinox. 3000-year history. UNESCO Heritage.'}}]},
+  {kg:'Чын Куран',ru:'Апрель',en:'April',origin:{ky:'Чыныгы жылуулук.',ru:'Настоящее тепло.',en:'True warmth.'},holidays:[]},
+  {kg:'Бугу',ru:'Май',en:'May',origin:{ky:'Жайлоо башталат.',ru:'Джайлоо начинается.',en:'Jailoo begins.'},
+   holidays:[{d:1,name:{ky:'Эмгек күнү',ru:'День труда',en:'Labour Day'},emoji:'🌷',info:{ky:'Дүйнөдөгү эмгекчилердин эл аралык майрамы.',ru:'Международный праздник трудящихся.',en:'International workers holiday.'}},{d:5,name:{ky:'Конституция күнү',ru:'День Конституции КР',en:'Constitution Day'},emoji:'📜',info:{ky:'1993-жылы 5-майда Кыргыз Республикасынын биринчи Конституциясы кабыл алынган.',ru:'5 мая 1993 года принята первая Конституция Кыргызстана.',en:'May 5, 1993 — Kyrgyzstan\'s first Constitution adopted.'}}]},
+  {kg:'Кулжа',ru:'Июнь',en:'June',origin:{ky:'Жай чоку.',ru:'Разгар лета.',en:'Peak summer.'},
+   holidays:[{d:1,name:{ky:'Балдарды коргоо күнү',ru:'День защиты детей',en:"Children's Day"},emoji:'🧒',info:{ky:'Балдарды коргоо жана алардын укуктарын сактоо майрамы.',ru:'Праздник защиты прав детей.',en:'Children rights protection day.'}}]},
+  {kg:'Теке',ru:'Июль',en:'July',origin:{ky:'Той жана оюндар. Кымыз.',ru:'Свадьбы. Кумыс.',en:'Weddings. Kumys.'},holidays:[]},
+  {kg:'Баш Оона',ru:'Август',en:'August',origin:{ky:'Жайлоодон түшүү башталат.',ru:'Начало спуска с джайлоо.',en:'Jailoo descent begins.'},
+   holidays:[{d:31,name:{ky:'Эгемендүүлүк күнү',ru:'День независимости',en:'Independence Day'},emoji:'🇰🇬',info:{ky:'1991-жылы 31-августта Кыргыз Республикасы Советтер Союзунан эгемендигин жарыялаган.',ru:'31 августа 1991 года провозглашена независимость от СССР.',en:'Aug 31, 1991 — independence declared from USSR.'}}]},
+  {kg:'Аяк Оона',ru:'Сентябрь',en:'September',origin:{ky:'Мектеп башталат.',ru:'Школа начинается.',en:'School starts.'},
+   holidays:[{d:1,name:{ky:'Билим берүү күнү',ru:'День знаний',en:'Knowledge Day'},emoji:'📚',info:{ky:'Мектептер жаңы окуу жылын баштайт.',ru:'Школы начинают новый учебный год.',en:'Schools start new year.'}}]},
+  {kg:'Тогуздун айы',ru:'Октябрь',en:'October',origin:{ky:'Согым убакты.',ru:'Время заготовок.',en:'Harvest time.'},holidays:[]},
+  {kg:'Жетинин айы',ru:'Ноябрь',en:'November',origin:{ky:'Кышкы согым.',ru:'Зимние заготовки.',en:'Winter preparations.'},holidays:[]},
+  {kg:'Алтынын айы',ru:'Декабрь',en:'December',origin:{ky:'Отко жакын. Жомок айтылат.',ru:'Ближе к огню. Сказки.',en:'Close to fire. Fairy tales.'},
+   holidays:[{d:31,name:{ky:'Жаңы жылды тосуу',ru:'Встреча Нового года',en:"New Year's Eve"},emoji:'🎆',info:{ky:'Жаңы жылды тосуу майрамы.',ru:'Встреча Нового года.',en:'New Year\'s Eve.'}}]},
 ];
 
 var traditions=[
-  {name:{ky:'Бешик той',ru:'Бешик той',en:'Beshik toy'},
-   emoji:'🍼',cat:'rite',
-   desc:{ky:'Баланы биринчи жолу бешикке салуу майрамы. 40 күн толгондо өткөрүлөт. Чоң той берилет. Жакын туугандар жана дос-жолдоштор чакырылат. Баланы бешикке салгандан кийин "Жарыктык болсун!" деп бата берилет.',
-        ru:'Праздник первой укладки ребёнка в колыбель. Проводится по истечении 40 дней. Большой той. Приглашаются близкие родственники и друзья. После укладки даётся благословение "Пусть будет светлым!"',
-        en:'Celebration of first placing baby in cradle. Held after 40 days. Big toy (feast). Close relatives and friends invited. After placing the baby, a blessing is given: "May you be bright!"'}},
-  {name:{ky:'Той — Кыргыз той',ru:'Той — кыргызский праздник',en:'Toy — Kyrgyz feast'},
-   emoji:'🎉',cat:'celebration',
-   desc:{ky:'Кыргыз тою — эл жыйылган байрам. Ат чабыш, күрөш, кыз куумай, эр эниш — ат ойундары. Комузчулар жана акындар — айтыш. Кой жана уй эти. Кымыз жана боз үй. Тойдун катышуучусу болуу — урматтоо белгиси.',
-        ru:'Кыргызский той — народный праздник. Конные скачки, борьба, кыз куумай, эр эниш. Комузисты и акыны — айтыш. Баранина и говядина. Кумыс и юрта. Участие в тое — знак уважения.',
-        en:'Kyrgyz toy — a people\'s celebration. Horse racing, wrestling, kyz kuumay, er enish. Komuz players and akyns — aitush. Mutton and beef. Kumys and yurt. Participation in toy is a sign of respect.'}},
-  {name:{ky:'Боз үй — кочмон тиричилик',ru:'Боз үй — кочевая юрта',en:'Boz Üy — nomadic yurt'},
-   emoji:'🏕',cat:'culture',
-   desc:{ky:'Боз үй — кыргыздын мобилдүү үйү. 2 саатта куруп, 2 саатта сокку алынат. Кийиз 3-4 сантиметр. Кышта -30 градуска чыдайт. 3 бөлүк: жогорку чеңбер (түндүк), тирек бадалдар (уук), тегерек дубал (керге). ЮНЕСКО Адамзаттын Мурасы.',
-        ru:'Боз уй — мобильный кыргызский дом. Собирается и разбирается за 2 часа. Войлок 3-4 см. Выдерживает -30 градусов. 3 части: верхнее кольцо (тюндюк), опорные жерди (уук), круглые стены (кереге). Наследие ЮНЕСКО.',
-        en:'Boz üy — the mobile Kyrgyz home. Assembled and disassembled in 2 hours. Felt 3-4cm thick. Withstands -30 degrees. 3 parts: upper ring (tündük), support poles (uuk), circular walls (kerege). UNESCO Heritage.'}},
-  {name:{ky:'Кымыз — ыйык сусун',ru:'Кумыс — священный напиток',en:'Kumys — sacred drink'},
-   emoji:'🥛',cat:'food',
-   desc:{ky:'Байкал эмчегинин сүтүнөн жасалган ачытылган сусун. Жылкынын сүтү ачытылат. Антибиотикалык касиети бар. Кыргызда кымыз эм деп эсептелет. Жыл сайын июнь айында Кымыз майрамы өтөт. Бир чоло кымыздын баасы 3-5 доллар.',
-        ru:'Кисломолочный напиток из кобыльего молока. Кобылье молоко сквашивается. Обладает антибиотическими свойствами. В Кыргызстане кумыс считается лекарством. Ежегодно в июне — Праздник кумыса. Одна чолпа кумыса стоит 3-5 долларов.',
-        en:'Fermented drink made from mare\'s milk. Antibiotic properties. In Kyrgyzstan kumys is considered medicine. Annual Kumys Festival in June. One cholpa of kumys costs 3-5 dollars.'}},
-  {name:{ky:'Ат ойундары',ru:'Конные игры',en:'Horse Games'},
-   emoji:'🐎',cat:'sport',
-   desc:{ky:'Ат чабыш — жарышта алдыда жеткен жеңет. Кыз куумай — жигит кызды кубалайт. Ок жаа — атта жүрүп жаа атуу. Жамбы атуу — жамбыга атуу. Улак тартыш — казактарда "кок-бору" — кой сойгон. Эр эниш — жерден нерсе алуу. Тыйын энмей — монета алуу.',
-        ru:'Ат чабыш — скачки. Кыз куумай — джигит догоняет девушку. Ок жаа — стрельба из лука на коне. Жамбы атуу — стрельба по мишени. Улак тартыш — тяни-толкай с тушей козла. Эр эниш — поднятие предмета с земли. Тыйын энмей — подбор монеты.',
-        en:'At chabish — horse racing. Kyz kuumay — rider chases a girl. Ok jaa — archery on horseback. Jamby atuу — target shooting. Ulak tartish — goat carcass tug-of-war. Er enish — picking up item from ground. Tiyyn enmey — coin pickup.'}},
-  {name:{ky:'Айтыш — поэтикалык дуэль',ru:'Айтыш — поэтический поединок',en:'Aitush — poetic duel'},
-   emoji:'🎤',cat:'art',
-   desc:{ky:'Айтыш — эки акындын импровизациялык поэтикалык беттешүүсү. Акындар комуз коштоосунда ырдашат. Тема элдик, саясий, философиялык болот. Угуучулар тарабынан баалоо жүргүзүлөт. Айтыш чемпионаттары Кыргызстанда жылына бир нече жолу өтөт. ЮНЕСКО Мурасы.',
-        ru:'Айтыш — импровизационный поэтический поединок двух акынов. Акыны поют под аккомпанемент комуза. Темы: народные, политические, философские. Оцениваются слушателями. Чемпионаты айтыш проводятся несколько раз в год. Наследие ЮНЕСКО.',
-        en:'Aitush — improvised poetic duel between two akyns. Akyns sing accompanied by komuz. Topics: folk, political, philosophical. Judged by listeners. Aitush championships held several times a year. UNESCO Heritage.'}},
-  {name:{ky:'Жаназа жана Аш',ru:'Жаназа и Аш',en:'Janaza and Ash'},
-   emoji:'🕯',cat:'rite',
-   desc:{ky:'Жаназа — дефне маросими. Коктор, курандар окулат. Аш — мерхумдун арвахына берилген той. 40 күн, 1 жыл, 3 жылдан кийин берилет. Мала атылат. Улуулар мактоо сөздөрүн айтат. Аш берүү — урматтоонун белгиси.',
-        ru:'Жаназа — похоронный обряд. Читаются суры, молитвы. Аш — поминальный той. Проводится через 40 дней, 1 год, 3 года. Забивают скот. Старейшины произносят хвалебные слова. Аш — знак уважения.',
-        en:'Janaza — funeral rite. Surahs and prayers recited. Ash — memorial feast. Held at 40 days, 1 year, 3 years. Livestock slaughtered. Elders offer words of praise. Ash is a mark of respect.'}},
-  {name:{ky:'Мүчөл — туулган күн',ru:'Мүчёл — юбилей',en:'Müchöl — anniversary'},
-   emoji:'🎂',cat:'celebration',
-   desc:{ky:'12 жылдык циклдин аяктоосу. 12, 24, 36, 48, 60, 72, 84 жашта. Кыргызта "Мүчөл жашы" — маанилүү даталар. Мүчөл жашына кирген адамга "Мүчөл той" берилет. Жаман болуп кетпеш үчүн кызыл туман кийишет.',
-        ru:'Завершение 12-летнего цикла. В 12, 24, 36, 48, 60, 72, 84 года. "Мүчөл жашы" — важные даты. Человеку исполняющему "мүчёл" дают праздник. Надевают красный пояс, чтобы не случилось беды.',
-        en:'Completion of 12-year cycle. At ages 12, 24, 36, 48, 60, 72, 84. "Müchöl jashi" — important dates. A person entering müchöl gets a celebration. Red sash worn to ward off misfortune.'}},
+  {name:{ky:'Бешик той',ru:'Бешик той',en:'Beshik toy'},emoji:'🍼',cat:'rite',
+   short:{ky:'Баланы бешикке салуу маросими',ru:'Обряд укладки в колыбель',en:'First cradle ceremony'},
+   desc:{ky:'Баланы биринчи жолу бешикке салуу майрамы. 40 күн толгондо өткөрүлөт. Чоң той берилет.',
+        ru:'Первое укладывание ребёнка в колыбель через 40 дней. Большой той с родственниками.',
+        en:'First cradle ceremony after 40 days. Big feast with relatives.'},
+   facts:[{ky:'40 күн — баланын жерге кабыл алынышынын символу',ru:'40 дней — символ принятия ребёнка землёй',en:'40 days — symbol of child acceptance by earth'}]},
+  {name:{ky:'Той — Кыргыз той',ru:'Той — кыргызский праздник',en:'Toy — Kyrgyz feast'},emoji:'🎉',cat:'celebration',
+   short:{ky:'Элдик чоң байрам жана жыйын',ru:'Народный праздник и собрание',en:'Folk feast and gathering'},
+   desc:{ky:'Кыргыз тою — эл жыйылган чоң байрам. Ат чабыш, күрөш, кыз куумай, улак тартыш — ат оюндары.',
+        ru:'Той — большой кыргызский праздник. Скачки, борьба, улак тартыш.',
+        en:'Toy — a great Kyrgyz celebration. Horse races, wrestling, kok-boru.'},
+   facts:[{ky:'Тойго чакырылбай барса да — кош келдиңиз',ru:'На той приходят и без приглашения',en:'You can arrive uninvited — always welcome'}]},
+  {name:{ky:'Боз үй — Кочмон тиричилик',ru:'Боз үй — кочевая юрта',en:'Boz Üy — nomadic yurt'},emoji:'🏕',cat:'culture',
+   short:{ky:'Кыргыздын мобилдүү байыркы үйү',ru:'Мобильный традиционный дом кыргызов',en:'Mobile traditional Kyrgyz home'},
+   desc:{ky:'Боз үй — кыргыздын мобилдүү үйү. 2 саатта куруп, 2 саатта сокку алынат. 2014-жылы ЮНЕСКО Адамзаттын Мурасы тизмесине кирген.',
+        ru:'Боз уй — мобильный кыргызский дом. Сборка/разборка за 2 часа. ЮНЕСКО 2014.',
+        en:'Boz üy — mobile Kyrgyz home. Assembled/disassembled in 2 hours. UNESCO 2014.'},
+   facts:[{ky:'2014-жылы ЮНЕСКО тарабынан Адамзаттын Мурасы катары таанылган',ru:'Признан Наследием ЮНЕСКО в 2014 году',en:'UNESCO Heritage recognized in 2014'}]},
+  {name:{ky:'Кымыз — Ыйык сусун',ru:'Кумыс — священный напиток',en:'Kumys — sacred drink'},emoji:'🥛',cat:'food',
+   short:{ky:'Жылкы сүтүнөн ачытылган байыркы сусун',ru:'Ферментированный напиток из кобыльего молока',en:'Fermented mare milk traditional drink'},
+   desc:{ky:'Кымыз — жылкынын сүтүнөн жасалган ачытылган сусун. 3000 жылдан ашык тарыхы бар.',
+        ru:'Кумыс — ферментированное кобылье молоко. 3000+ лет истории.',
+        en:'Kumys — fermented mare milk. 3000+ year history.'},
+   facts:[{ky:'Кымыздын 1.5-2% спиртке жакын курамы бар',ru:'Содержит 1.5-2% алкоголя',en:'Contains 1.5-2% alcohol'}]},
+  {name:{ky:'Ат оюндары',ru:'Конные игры',en:'Horse Games'},emoji:'🐎',cat:'sport',
+   short:{ky:'Байыркы кыргыз ат оюндарынын түрлөрү',ru:'Виды традиционных конных игр кыргызов',en:'Traditional Kyrgyz horse game types'},
+   desc:{ky:'АТ ЧАБЫШ — ат жарышы. КЫЗ КУУМАЙ — жигит кызды кубалайт. УЛАК ТАРТЫШ — кой сойгон менен эки команда беттешет.',
+        ru:'АТ ЧАБЫШ — скачки. КЫЗ КУУМАЙ — джигит догоняет девушку. УЛАК ТАРТЫШ — перетягивание туши.',
+        en:'AT CHABISH — horse racing. KYZ KUUMAY — rider chases girl. ULAK TARTISH — goat carcass tug of war.'},
+   facts:[{ky:'Кок-бору — 2016-жылы ЮНЕСКО тизмесине кирди',ru:'Кок-бору включён в список ЮНЕСКО в 2016 году',en:'Kok-boru UNESCO listed in 2016'}]},
+  {name:{ky:'Айтыш — Поэтикалык дуэль',ru:'Айтыш — поэтический поединок',en:'Aitush — poetic duel'},emoji:'🎤',cat:'art',
+   short:{ky:'Эки акындын импровизациялык поэтикалык беттешүүсү',ru:'Импровизационный поединок двух акынов',en:'Improvised poetic duel between two akyns'},
+   desc:{ky:'Айтыш — эки акындын импровизациялык поэтикалык беттешүүсү. ЮНЕСКО Адамзаттын Мурасы.',
+        ru:'Айтыш — импровизационный поединок под комуз. Наследие ЮНЕСКО.',
+        en:'Aitush — improvised poetic duel under komuz. UNESCO Heritage.'},
+   facts:[{ky:'ЮНЕСКО 2015-жылы Айтышты Адамзаттын Мурасы катары тааныды',ru:'ЮНЕСКО признало айтыш наследием в 2015 году',en:'UNESCO recognized aitush as heritage in 2015'}]},
 ];
 
 var funFacts=[
-  {ky:'Кыргызстан дүйнөдө эки мамлекеттен өтүп аталган өлкөлөрдүн бири.',ru:'Кыргызстан — одна из немногих стран, названных в честь своего народа дважды.',en:'Kyrgyzstan is one of the few countries named twice after its people.'},
-  {ky:'Кыргызстандагы суунун 47%и таза суу — дүйнөдөгү эң жогорку көрсөткүч.',ru:'47% воды Кыргызстана — пресная — один из самых высоких показателей в мире.',en:'47% of Kyrgyzstan\'s water is fresh water — one of the highest rates in the world.'},
-  {ky:'Ысык-Көл — деңиз деңгелинен 1607 метр бийиктиктеги тоолуу көл жана эч качан тоңбойт.',ru:'Иссык-Куль — горное озеро на высоте 1607 м и никогда не замерзает.',en:'Issyk-Kul is a mountain lake at 1,607m altitude and never freezes.'},
-  {ky:'Кыргыз эпосу Манас — 500 000 сап менен дүйнөдөгү эң узун эпостордун бири.',ru:'Эпос "Манас" — один из длиннейших эпосов мира с 500 000 строк.',en:'The Manas epic with 500,000 lines is one of the longest in the world.'},
-  {ky:'Боз үй (кыргыз юртасы) 2014-жылы ЮНЕСКО тарабынан Адамзаттын Мурасы катары таанылган.',ru:'Боз уй включён в список нематериального наследия ЮНЕСКО в 2014 году.',en:'Boz üy was inscribed on UNESCO\'s Intangible Cultural Heritage list in 2014.'},
-  {ky:'Кыргызстан жер бетинин 90%дан ашыгы тоолор менен жабылган.',ru:'Более 90% территории Кыргызстана занято горами.',en:'More than 90% of Kyrgyzstan\'s territory is covered by mountains.'},
-  {ky:'Аларкуу тоо чокусу — Кыргызстандын эң бийик чокусу, 7439 метр.',ru:'Пик Победы — высшая точка Кыргызстана, 7439 метров.',en:'Peak Pobeda is Kyrgyzstan\'s highest point at 7,439 metres.'},
-  {ky:'Нооруз майрамы 21-марта жаңы жылдын башы катары белгиленет. 3000 жылдык тарыхы бар.',ru:'Нооруз отмечается 21 марта как начало нового года. Имеет 3000-летнюю историю.',en:'Nooruz is celebrated on March 21 as the new year. It has a 3,000-year history.'},
-  {ky:'Кыргызстанда 88 миллиондон ашык козу жана кой бар — адам санынан 15 эсе ашык.',ru:'В Кыргызстане более 88 миллионов овец — в 15 раз больше, чем людей.',en:'Kyrgyzstan has over 88 million sheep — 15 times more than people.'},
-  {ky:'Айтматовдун "Жамийла" романы дүйнөдөгү эң кооз сүйүү тарыхы деп баалана.',ru:'"Джамиля" Айтматова считается одной из красивейших историй любви в мире.',en:'Aitmatov\'s "Jamila" is considered one of the most beautiful love stories in the world.'},
+  {ky:'Кыргызстан жер бетинин 90%дан ашыгы тоолор менен жабылган.',ru:'Более 90% территории Кыргызстана занято горами.',en:'Over 90% of Kyrgyzstan is covered by mountains.'},
+  {ky:'Ысык-Көл — деңиз деңгелинен 1607 метр бийиктиктеги тоолуу көл жана эч качан тоңбойт.',ru:'Иссык-Куль на высоте 1607 м никогда не замерзает.',en:'Issyk-Kul at 1,607m and never freezes.'},
+  {ky:'Кыргыз эпосу Манас — 500 000 сап менен дүйнөдөгү эң узун эпостордун бири.',ru:'Эпос Манас — 500 000 строк, один из длиннейших.',en:'Manas epic, 500,000 lines, among world\'s longest.'},
+  {ky:'Боз үй 2014-жылы ЮНЕСКО тарабынан Адамзаттын Мурасы катары таанылган.',ru:'Боз уй — Наследие ЮНЕСКО с 2014 года.',en:'Boz üy UNESCO Heritage since 2014.'},
+  {ky:'Нооруз майрамы 3000 жылдык тарыхы бар жана 300 миллиондон ашык адам белгилейт.',ru:'Нооруз с 3000-летней историей отмечают 300+ млн людей.',en:'Nooruz with 3000-year history celebrated by 300+ million.'},
+  {ky:'Кыргызстанда 80дөн ашык улуттун өкүлдөрү жашайт.',ru:'В Кыргызстане 80+ национальностей.',en:'80+ nationalities live in Kyrgyzstan.'},
+  {ky:'Аларкуу тоо чокусу — 7439 метр.',ru:'Пик Победы — 7439 м.',en:'Peak Pobeda — 7,439m.'},
+  {ky:'Кыргызстанда 3000дан ашык өзөн жана 2000дан ашык суу сактагыч бар.',ru:'В Кыргызстане 3000+ рек и 2000+ озёр.',en:'Kyrgyzstan has 3000+ rivers and 2000+ lakes.'},
 ];
 
 var questTemplates=[
-  {ky:'Манас эпосунан 10 саптан ашык окуу',ru:'Прочитать 10+ строк эпоса Манас',en:'Read 10+ lines from the Manas epic',xp:150},
-  {ky:'Мүчөл жылыңды аныктоо',ru:'Определить свой год мүчёл',en:'Determine your müchöl year',xp:100},
-  {ky:'Бир тарыхый жерди изилдөө',ru:'Исследовать одно историческое место',en:'Research one historical site',xp:120},
-  {ky:'Улуу инсандан бата алуу',ru:'Получить благословение от старейшины',en:'Receive blessing from an elder',xp:200},
+  {ky:'Манас эпосунан 10 сап окуу',ru:'Прочитать 10 строк Манаса',en:'Read 10 lines from Manas',xp:150},
+  {ky:'Мүчөл жылыңды аныктоо',ru:'Определить свой год мүчёл',en:'Find your müchöl year',xp:100},
+  {ky:'Бир сакралдык жерди изилдөө',ru:'Изучить сакральное место',en:'Research a sacred site',xp:120},
   {ky:'Кыргыз тамак-ашын бышыруу',ru:'Приготовить кыргызское блюдо',en:'Cook a Kyrgyz dish',xp:180},
-  {ky:'Боз үй тарыхын окуу',ru:'Прочитать историю боз уя',en:'Read the history of boz üy',xp:110},
-  {ky:'Нооруз майрамы жөнүндө билүү',ru:'Узнать о празднике Нооруз',en:'Learn about Nooruz holiday',xp:130},
-  {ky:'Комуздун тарыхын изилдөө',ru:'Исследовать историю комуза',en:'Research the history of komuz',xp:140},
+  {ky:'Боз үй тарыхын окуу',ru:'Прочитать о боз уе',en:'Read about boz üy',xp:110},
+  {ky:'Нооруз жөнүндө окуу',ru:'Узнать о Нооруз',en:'Learn about Nooruz',xp:130},
+  {ky:'Бир даңктуу инсанды изилдөө',ru:'Изучить знаменитую личность',en:'Research a famous person',xp:160},
+  {ky:'Айтыш жөнүндө окуу',ru:'Узнать об айтыш',en:'Learn about aitush',xp:140},
 ];
 
 var quests=[
-  {text:{ky:'Ай-Күн календарын изилде',ru:'Исследуй лунный календарь',en:'Study the lunar calendar'},xp:100,done:false},
-  {text:{ky:'3 сакралдык жерди изилде',ru:'Изучи 3 сакральных места',en:'Explore 3 sacred sites'},xp:150,done:false},
-  {text:{ky:'Манас жөнүндө окуу',ru:'Читать о Манасе',en:'Read about Manas'},xp:200,done:true},
+  {text:{ky:'Ай-Күн календарын изилде',ru:'Изучи лунный календарь',en:'Study the lunar calendar'},xp:100,done:false},
+  {text:{ky:'3 сакралдык жерди карап чык',ru:'Посмотри 3 сакральных места',en:'Browse 3 sacred sites'},xp:150,done:false},
+  {text:{ky:'Манас жөнүндө окуу',ru:'Читать о Манасе',en:'Read about Manas'},xp:200,done:false},
 ];
 
-var curMonth=new Date().getMonth(),curYear=new Date().getFullYear(),selRegion='all',selAnimal=6,selPersonCat='all',curFact=0,selPersonSearch='',selPlaceSearch='';
+var curMonth=new Date().getMonth(), curYear=new Date().getFullYear();
+var selRegion='all', selAnimalIdx=6, selPersonCat='all';
+var selPersonSearch='', selPlaceSearch='', curFact=0;
+var leafletMap=null;
 
-function t(key){return (T[lang]&&T[lang][key])||T['ky'][key]||key;}
+function addXP(amount){
+  xpTotal+=amount;
+  updateXPBar();
+  showToast('+'+amount+' XP ⭐');
+}
+function updateXPBar(){
+  var lvl=LEVELS.find(function(l){return xpTotal<l.max;})||LEVELS[LEVELS.length-1];
+  var pct=Math.min(100,((xpTotal-lvl.min)/(lvl.max-lvl.min))*100);
+  document.getElementById('xp-bar').style.width=pct+'%';
+  document.getElementById('rank-title-el').textContent=(lvl.rank[lang]||lvl.rank.ky);
+  document.getElementById('rank-level-el').textContent='Деңгээл '+lvl.lvl+' · '+xpTotal+' XP';
+  document.getElementById('xp-cur').textContent=xpTotal+' XP';
+  document.getElementById('xp-max').textContent=lvl.max+' XP';
+}
+function showToast(msg){
+  var el=document.getElementById('xp-toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(function(){el.classList.remove('show');},2200);
+}
+
+function toggleQuest(idx){
+  if(!quests[idx].done){
+    quests[idx].done=true;
+    streak++;
+    document.getElementById('streak-num').textContent=streak;
+    addXP(quests[idx].xp);
+  } else {
+    quests[idx].done=false;
+    xpTotal=Math.max(0,xpTotal-quests[idx].xp);
+    streak=Math.max(0,streak-1);
+    document.getElementById('streak-num').textContent=streak;
+    updateXPBar();
+  }
+  renderQuests();
+}
+function deleteQuest(idx){quests.splice(idx,1);renderQuests();}
+function addRandomQuest(){
+  var q=questTemplates[Math.floor(Math.random()*questTemplates.length)];
+  quests.push({text:q,xp:q.xp,done:false});
+  renderQuests();
+}
+function renderQuests(){
+  var html='';
+  quests.forEach(function(q,i){
+    html+='<div class="quest-card"><div class="quest-row">';
+    html+='<div class="quest-check '+(q.done?'done':'')+'" onclick="toggleQuest('+i+')">'+(q.done?'✓':'')+'</div>';
+    html+='<span style="flex:1;font-size:12px;color:'+(q.done?'var(--text3)':'var(--text)')+(q.done?';text-decoration:line-through':'')+'">'+(q.text[lang]||q.text.ky)+'</span>';
+    html+='<span class="xp-badge">★ '+q.xp+'</span>';
+    html+='<button class="del-btn" onclick="deleteQuest('+i+')" title="'+t('del_quest')+'">×</button>';
+    html+='</div></div>';
+  });
+  document.getElementById('quests-container').innerHTML=html;
+}
 
 function setLang(l,btn){
   lang=l;
-  document.querySelectorAll('.top-btn').forEach(b=>b.classList.remove('active-lang'));
+  document.querySelectorAll('.top-btn').forEach(function(b){b.classList.remove('active-lang');});
   if(btn)btn.classList.add('active-lang');
   updateAllText();
-  renderCalendar();renderMuchol();renderPersons();renderPlaces();renderTraditions();renderQuests();renderHomePersons();updateTodayCard();updateFact();
+  renderCalendar();renderMuchol();renderPersons();renderPlaces();renderTraditions();
+  renderQuests();renderHomePersons();updateTodayCard();updateFact();updateXPBar();
 }
-
 function updateAllText(){
-  document.querySelectorAll('[data-t]').forEach(el=>{
-    var key=el.getAttribute('data-t');
-    if(T[lang]&&T[lang][key])el.textContent=T[lang][key];
-    else if(T['ky'][key])el.textContent=T['ky'][key];
-  });
-  document.querySelectorAll('[data-placeholder]').forEach(el=>{
-    var key=el.getAttribute('data-placeholder');
-    if(T[lang]&&T[lang][key])el.placeholder=T[lang][key];
+  document.querySelectorAll('[data-t]').forEach(function(el){
+    var v=(T[lang]&&T[lang][el.getAttribute('data-t')])||T.ky[el.getAttribute('data-t')];
+    if(v)el.textContent=v;
   });
 }
 
 function toggleTheme(){
   isDark=!isDark;
-  if(isDark){document.getElementById('app').classList.remove('light');document.getElementById('theme-btn').textContent='🌙';}
-  else{document.getElementById('app').classList.add('light');document.getElementById('theme-btn').textContent='☀️';}
+  document.getElementById('app').classList.toggle('light',!isDark);
+  document.getElementById('theme-btn').textContent=isDark?'🌙':'☀️';
+  if(leafletMap)setTimeout(function(){leafletMap.invalidateSize();},200);
 }
 
 function goTo(id,btn,idx){
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.content').forEach(function(c){c.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   if(btn)btn.classList.add('active');
   else{var items=document.querySelectorAll('.nav-item');if(idx!=null&&items[idx])items[idx].classList.add('active');}
-  if(id==='map')renderPlaces();
+  if(id==='map'){renderPlaces();initMap();}
   if(id==='calendar')renderCalendar();
   if(id==='muchol')renderMuchol();
   if(id==='danktuu')renderPersons();
   if(id==='traditions')renderTraditions();
 }
 
-function toggleQuest(el,idx){
-  quests[idx].done=!quests[idx].done;
-  if(quests[idx].done){xpTotal+=quests[idx].xp;updateXP();}
-  renderQuests();
+function openModal(html){
+  document.getElementById('modal-content').innerHTML=html;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(e,force){
+  if(force||!e||e.target===document.getElementById('modal')){
+    document.getElementById('modal').classList.remove('open');
+  }
 }
 
-function updateXP(){
-  var pct=Math.min(100,(xpTotal/5000)*100);
-  document.getElementById('xp-bar').style.width=pct+'%';
-}
-
-function addRandomQuest(){
-  var q=questTemplates[Math.floor(Math.random()*questTemplates.length)];
-  quests.push({text:q,xp:q.xp,done:false});
-  renderQuests();
-}
-
-function renderQuests(){
-  var html='';
-  quests.forEach(function(q,i){
-    html+='<div class="quest-card"><div class="quest-row">';
-    html+='<div class="quest-check '+(q.done?'done':'')+'" onclick="toggleQuest(this,'+i+')">'+(q.done?'✓':'')+'</div>';
-    html+='<span style="font-size:12px;color:'+(q.done?'var(--text3)':'var(--text)')+'";text-decoration:'+(q.done?'line-through':'none')+'">'+(q.text[lang]||q.text.ky)+'</span>';
-    html+='<span class="xp-badge">★ '+q.xp+'</span>';
-    html+='</div></div>';
+function initMap(){
+  if(leafletMap)return;
+  leafletMap=L.map('leaflet-map',{zoomControl:true}).setView([41.5,74.5],7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap',maxZoom:18
+  }).addTo(leafletMap);
+  var goldIcon=L.divIcon({
+    html:'<div style="width:28px;height:28px;background:#8B1A1A;border:2px solid #D4A843;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:13px;line-height:28px;display:block;text-align:center;width:100%">📍</span></div>',
+    iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-30],className:''
   });
-  document.getElementById('quests-container').innerHTML=html;
+  places.forEach(function(p){
+    L.marker([p.coords.lat,p.coords.lng],{icon:goldIcon}).addTo(leafletMap)
+    .bindPopup(
+      '<div style="min-width:170px;font-family:\'Segoe UI\',sans-serif">'
+      +'<div style="font-size:24px;text-align:center;margin-bottom:4px">'+p.emoji+'</div>'
+      +'<div style="font-weight:700;font-size:13px;color:#D4A843;text-align:center">'+(p.name[lang]||p.name.ky)+'</div>'
+      +'<div style="font-size:11px;color:#C8A86A;text-align:center;margin-bottom:8px">'+(p.type[lang]||p.type.ky)+'</div>'
+      +'<button onclick="showPlace('+p.id+')" style="background:#D4A843;color:#0D0B07;border:none;border-radius:7px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;width:100%">'+t('desc_lbl')+'</button>'
+      +'</div>'
+    );
+  });
+}
+function filterRegion(el,r){
+  selRegion=r;
+  document.querySelectorAll('#region-chips .chip').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+  renderPlaces();
+  if(leafletMap){
+    if(r==='all'){leafletMap.setView([41.5,74.5],7);}
+    else{var p=places.find(function(x){return x.region===r;});if(p)leafletMap.setView([p.coords.lat,p.coords.lng],9);}
+  }
+}
+function searchPlaces(v){selPlaceSearch=v.toLowerCase();renderPlaces();}
+function renderPlaces(){
+  var filtered=places.filter(function(p){
+    var rOk=selRegion==='all'||p.region===selRegion;
+    var sOk=!selPlaceSearch||(p.name.ky+p.name.ru+p.name.en+p.region).toLowerCase().includes(selPlaceSearch);
+    return rOk&&sOk;
+  });
+  document.getElementById('places-list').innerHTML=filtered.map(function(p){
+    return '<div class="place-card" onclick="showPlace('+p.id+')">'
+      +'<div class="place-thumb">'
+      +'<img src="'+p.photo+'" alt="'+( p.name[lang]||p.name.ky)+'" onerror="this.style.display=\'none\'">'
+      +'<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(13,11,7,0.9),transparent);padding:8px 10px">'
+      +'<div style="font-weight:700;font-size:13px;color:#D4A843">'+(p.name[lang]||p.name.ky)+'</div>'
+      +'<div style="font-size:10px;color:#C8A86A">'+(p.type[lang]||p.type.ky)+'</div>'
+      +'</div></div>'
+      +'<div class="place-body" style="display:flex;align-items:center;justify-content:space-between">'
+      +'<span class="badge">'+p.region+'</span>'
+      +'<span style="font-size:11px;color:var(--text3)">→ '+t('desc_lbl')+'</span>'
+      +'</div></div>';
+  }).join('');
 }
 
-function rotateFact(){curFact=(curFact+1)%funFacts.length;updateFact();}
-function updateFact(){
-  var f=funFacts[curFact];
-  var el=document.getElementById('fact-home');
-  if(el)el.innerHTML='<div style="font-size:12px;line-height:1.7;color:var(--text2)">'+(f[lang]||f.ky)+'</div>';
+// ===================== FIXED showPlace =====================
+function showPlace(id){
+  var p=places.find(function(x){return x.id===id;});
+  if(!p)return;
+  var mapsUrl='https://www.openstreetmap.org/?mlat='+p.coords.lat+'&mlon='+p.coords.lng+'&zoom=14';
+  var factsHtml=(p.facts||[]).map(function(f){
+    return '<div style="font-size:11px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border2)">⭐ '+(f[lang]||f.ky)+'</div>';
+  }).join('');
+
+  document.getElementById('places-list').innerHTML=
+    '<button class="back-btn" onclick="renderPlaces()">'+t('back')+'</button>'
+
+    /* ===== HERO IMAGE BLOCK — FIXED ===== */
+    +'<div class="place-detail-hero">'
+    +'<img class="place-detail-img" src="'+p.photo+'" alt="'+(p.name[lang]||p.name.ky)+'" onerror="this.src=\'\';this.style.background=\'var(--border2)\';this.style.height=\'60px\'">'
+    +'<div class="place-detail-hero-overlay">'
+    +'<div style="font-size:20px;font-weight:800;color:#D4A843">'+(p.name[lang]||p.name.ky)+'</div>'
+    +'<div style="font-size:11px;color:#C8A86A">'+p.region+' · '+(p.type[lang]||p.type.ky)+'</div>'
+    +'<div style="font-size:10px;color:#7A6A3A;margin-top:2px">📍 '+p.coords.lat+', '+p.coords.lng+'</div>'
+    +'</div>'
+    +'<div style="padding:10px;background:var(--card)">'
+    +'<button class="btn-gold" style="margin-top:0" onclick="window.open(\''+mapsUrl+'\',\'_blank\')">'+t('open_map')+'</button>'
+    +'</div></div>'
+    /* ===== END HERO ===== */
+
+    +'<div class="card" style="margin-top:8px">'
+    +'<div class="gold" style="font-weight:700;margin-bottom:8px;font-size:13px">'+t('desc_lbl')+'</div>'
+    +'<div class="text2" style="font-size:12px;line-height:1.8">'+(p.desc[lang]||p.desc.ky)+'</div>'
+    +'</div>'
+
+    +'<div class="card card-gold">'
+    +'<div class="gold" style="font-weight:700;margin-bottom:8px;font-size:13px">'+t('legend_lbl')+'</div>'
+    +'<div class="text2" style="font-size:12px;line-height:1.8">'+(p.legend[lang]||p.legend.ky)+'</div>'
+    +'</div>'
+
+    +'<div class="howto-box">'
+    +'<div class="gold" style="font-weight:700;margin-bottom:8px;font-size:13px">'+t('howto_lbl')+'</div>'
+    +'<div class="text2" style="font-size:12px;line-height:1.9">'+(p.howto[lang]||p.howto.ky)+'</div>'
+    +'</div>'
+
+    +(factsHtml?'<div class="card" style="margin-top:8px"><div class="gold" style="font-weight:700;margin-bottom:6px;font-size:13px">⭐ Факттар</div>'+factsHtml+'</div>':'');
+
+  addXP(20);
+}
+// ===================== END FIX =====================
+
+function renderCalendar(){
+  var m=months[curMonth];
+  document.getElementById('month-kg-name').textContent=m.kg;
+  document.getElementById('month-ru-name').textContent=(m[lang]||m.ru||m.en)+' '+curYear;
+  document.getElementById('month-origin').textContent=(m.origin[lang]||m.origin.ky);
+  document.getElementById('holiday-count').textContent=m.holidays.length;
+  document.getElementById('month-num').textContent=curMonth+1;
+  var dim=new Date(curYear,curMonth+1,0).getDate();
+  document.getElementById('days-count').textContent=dim;
+  var first=new Date(curYear,curMonth,1).getDay();
+  var offset=first===0?6:first-1;
+  var today=new Date();
+  var hols=m.holidays.map(function(h){return h.d;});
+  var html='';
+  for(var i=0;i<offset;i++)html+='<div class="cal-day other"></div>';
+  for(var d=1;d<=dim;d++){
+    var isToday=today.getFullYear()===curYear&&today.getMonth()===curMonth&&today.getDate()===d;
+    var isHol=hols.includes(d);
+    var dow=(offset+d-1)%7;
+    var isWknd=dow>=5;
+    var cls='cal-day'+(isToday?' today':'')+(isHol&&!isToday?' holiday':'')+(isWknd&&!isToday&&!isHol?' weekend':'');
+    html+='<div class="'+cls+'" onclick="'+(isHol?'showHolModal('+d+','+curMonth+')':'')+'">'+d+(isHol?'<div class="hol-dot"></div>':'')+'</div>';
+  }
+  document.getElementById('cal-days').innerHTML=html;
+  var hdiv=document.getElementById('holidays-list');
+  hdiv.innerHTML=m.holidays.map(function(h){
+    return '<div class="card card-interactive" onclick="showHolModal('+h.d+','+curMonth+')" style="display:flex;align-items:center;gap:12px">'
+      +'<div style="background:var(--gold);border-radius:10px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#0D0B07;flex-shrink:0">'+h.d+'</div>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">'+h.emoji+' '+(h.name[lang]||h.name.ky)+'</div>'
+      +'<div style="font-size:10px;color:var(--text3)">'+(m[lang]||m.ru||m.en)+' '+h.d+'</div></div>'
+      +'<div style="color:var(--text3);font-size:18px">›</div></div>';
+  }).join('');
+}
+function showHolModal(day,monthIdx){
+  var m=months[monthIdx];
+  var hol=m.holidays.find(function(h){return h.d===day;});
+  if(!hol)return;
+  openModal(
+    '<div style="text-align:center;margin-bottom:16px">'
+    +'<div style="font-size:52px;margin-bottom:8px">'+hol.emoji+'</div>'
+    +'<div style="font-size:19px;font-weight:700;color:var(--gold)">'+(hol.name[lang]||hol.name.ky)+'</div>'
+    +'<div style="font-size:12px;color:var(--text3);margin-top:4px">'+(m[lang]||m.ru||m.en)+' '+day+'</div>'
+    +'</div>'
+    +'<div style="background:var(--card2);border-radius:10px;padding:14px;font-size:13px;color:var(--text2);line-height:1.8">'+(hol.info[lang]||hol.info.ky)+'</div>'
+  );
+  addXP(10);
+}
+function changeMonth(d){
+  curMonth+=d;
+  if(curMonth<0){curMonth=11;curYear--;}
+  if(curMonth>11){curMonth=0;curYear++;}
+  renderCalendar();
 }
 
 function updateTodayCard(){
@@ -905,19 +933,29 @@ function updateTodayCard(){
   if(!el)return;
   var hols=m.holidays.filter(function(h){return h.d===now.getDate();});
   var holHtml=hols.map(function(h){return'<span class="badge" style="margin-right:4px">'+h.emoji+' '+(h.name[lang]||h.name.ky)+'</span>';}).join('');
-  el.innerHTML='<div style="display:flex;align-items:center;gap:10px">'
-    +'<div style="background:var(--gold);color:#0D0B07;border-radius:10px;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0">'+now.getDate()+'</div>'
-    +'<div><div class="gold" style="font-size:14px;font-weight:700">'+(m.kg||m.en)+' · '+(m[lang]||m.ru||m.en)+'</div>'
+  el.innerHTML='<div style="display:flex;align-items:center;gap:12px">'
+    +'<div style="background:var(--gold);color:#0D0B07;border-radius:12px;min-width:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">'
+    +'<span style="font-size:18px;font-weight:800;line-height:1">'+now.getDate()+'</span>'
+    +'<span style="font-size:8px;font-weight:700;letter-spacing:1px">'+(m[lang]||m.ru||m.en).slice(0,3).toUpperCase()+'</span>'
+    +'</div>'
+    +'<div><div class="gold" style="font-size:14px;font-weight:700">'+m.kg+' · '+(m[lang]||m.ru||m.en)+'</div>'
     +'<div class="text3" style="font-size:11px">'+(m.origin[lang]||m.origin.ky)+'</div>'
-    +(holHtml?'<div style="margin-top:4px">'+holHtml+'</div>':'')
+    +(holHtml?'<div style="margin-top:5px">'+holHtml+'</div>':'')
     +'</div></div>';
 }
-
+function rotateFact(){curFact=(curFact+1)%funFacts.length;updateFact();}
+function updateFact(){
+  var f=funFacts[curFact];
+  var el=document.getElementById('fact-home');
+  if(el)el.innerHTML='<div style="font-size:12px;line-height:1.7;color:var(--text2)">'+(f[lang]||f.ky)+'</div>';
+}
 function renderHomePersons(){
   var html='';
   persons.slice(0,4).forEach(function(p){
-    html+='<div class="card card-interactive" style="text-align:center;padding:12px" onclick="goTo(\'danktuu\',null,4)">'
-      +'<div style="font-size:28px">'+p.emoji+'</div>'
+    html+='<div class="card card-interactive" style="text-align:center;padding:12px;overflow:hidden" onclick="goTo(\'danktuu\',null,4)">'
+      +'<div style="width:48px;height:48px;border-radius:50%;overflow:hidden;margin:0 auto;border:2px solid var(--gold2);background:var(--border2)">'
+      +(p.img?'<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover">':'')
+      +'</div>'
       +'<div class="gold" style="font-size:11px;font-weight:700;margin-top:6px">'+p.name+'</div>'
       +'<div class="text3" style="font-size:9px;margin-top:2px">'+(p.role[lang]||p.role.ky)+'</div>'
       +'</div>';
@@ -925,164 +963,48 @@ function renderHomePersons(){
   document.getElementById('home-persons').innerHTML=html;
 }
 
-function filterRegion(el,r){
-  selRegion=r;
-  document.querySelectorAll('#region-chips .chip').forEach(function(c){c.classList.remove('active');});
-  el.classList.add('active');
-  renderPlaces();
-}
-
-function searchPlaces(v){selPlaceSearch=v.toLowerCase();renderPlaces();}
-
-function renderPlaces(){
-  var filtered=places.filter(function(p){
-    var regionOk=selRegion==='all'||p.region===selRegion;
-    var searchOk=!selPlaceSearch||p.name.ky.toLowerCase().includes(selPlaceSearch)||p.name.ru.toLowerCase().includes(selPlaceSearch)||p.name.en.toLowerCase().includes(selPlaceSearch)||(p.region&&p.region.toLowerCase().includes(selPlaceSearch));
-    return regionOk&&searchOk;
-  });
-  document.getElementById('places-list').innerHTML=filtered.map(function(p){
-    return'<div class="place-card" onclick="showPlace('+p.id+')">'
-      +'<div class="place-icon">'+p.emoji+'</div>'
-      +'<div style="flex:1">'
-      +'<div style="font-weight:700;font-size:14px;color:var(--gold)">'+(p.name[lang]||p.name.ky)+'</div>'
-      +'<div style="font-size:11px;color:var(--text2);margin-top:2px">'+(p.type[lang]||p.type.ky)+'</div>'
-      +'<div style="font-size:10px;color:var(--text3)">'+p.region+'</div>'
-      +'</div>'
-      +'<div style="color:var(--text3);font-size:20px">›</div>'
-      +'</div>';
-  }).join('');
-}
-
-function showPlace(id){
-  var p=places.find(function(x){return x.id===id;});
-  var mapsUrl='https://www.openstreetmap.org/?mlat='+p.coords.lat+'&mlon='+p.coords.lng+'&zoom=14';
-  var factsHtml=(p.facts||[]).map(function(f){return'<div class="fact-card" style="margin-bottom:4px"><div style="font-size:11px;color:var(--text2)">'+(f[lang]||f.ky)+'</div></div>';}).join('');
-  document.getElementById('places-list').innerHTML=
-    '<button class="back-btn" onclick="renderPlaces()">'+t('back')+'</button>'
-    +'<div style="text-align:center;background:var(--card);border-radius:12px;padding:20px;margin-bottom:10px;border:1px solid var(--border2)">'
-    +'<div style="font-size:56px">'+p.emoji+'</div>'
-    +'<div class="gold" style="font-size:18px;font-weight:700;margin-top:8px">'+(p.name[lang]||p.name.ky)+'</div>'
-    +'<div class="text2" style="font-size:11px">'+p.region+' · '+(p.type[lang]||p.type.ky)+'</div>'
-    +'<div class="text3" style="font-size:10px;margin-top:3px">'+t('location')+': '+p.coords.lat+', '+p.coords.lng+'</div>'
-    +'<button class="btn-gold" style="width:auto;padding:7px 16px;margin-top:10px;font-size:12px" onclick="window.open(\''+mapsUrl+'\',\'_blank\')">🗺 '+t('open_map_btn')+'</button>'
-    +'</div>'
-    +'<div class="card"><div class="gold" style="font-weight:700;margin-bottom:6px;font-size:13px">'+t('description')+'</div><div class="text2" style="font-size:12px;line-height:1.7">'+(p.desc[lang]||p.desc.ky)+'</div></div>'
-    +'<div class="card card-gold"><div class="gold" style="font-weight:700;margin-bottom:6px;font-size:13px">'+t('legend')+'</div><div class="text2" style="font-size:12px;line-height:1.7">'+(p.legend[lang]||p.legend.ky)+'</div></div>'
-    +(factsHtml?'<div style="margin-top:6px">'+factsHtml+'</div>':'');
-}
-
-function openMap(){
-  window.open('https://www.openstreetmap.org/#map=7/41.2/75.0','_blank');
-}
-
-function renderCalendar(){
-  var m=months[curMonth];
-  document.getElementById('month-kg-name').textContent=m.kg;
-  document.getElementById('month-ru-name').textContent=(m[lang]||m.ru)+' '+curYear;
-  document.getElementById('month-origin').textContent=(m.origin[lang]||m.origin.ky);
-  document.getElementById('holiday-count').textContent=m.holidays.length;
-  document.getElementById('month-num').textContent=curMonth+1;
-  var daysInMonth=new Date(curYear,curMonth+1,0).getDate();
-  document.getElementById('days-count').textContent=daysInMonth;
-  var grid=document.getElementById('cal-days');
-  var first=new Date(curYear,curMonth,1).getDay();
-  var offset=first===0?6:first-1;
-  var today=new Date();
-  var hols=m.holidays.map(function(h){return h.d;});
-  var html='';
-  for(var i=0;i<offset;i++)html+='<div class="cal-day other"></div>';
-  for(var d=1;d<=daysInMonth;d++){
-    var isToday=today.getFullYear()===curYear&&today.getMonth()===curMonth&&today.getDate()===d;
-    var isHol=hols.includes(d);
-    var dow=(offset+d-1)%7;
-    var isWknd=dow>=5;
-    var cls='cal-day';
-    if(isToday)cls+=' today';
-    else if(isHol)cls+=' holiday';
-    else if(isWknd)cls+=' weekend';
-    var dd=d;
-    html+='<div class="'+cls+'" onclick="showDayInfo('+dd+')">'+(isHol&&!isToday?'<span>'+d+'</span><div class="holiday-dot"></div>':d)+'</div>';
-  }
-  grid.innerHTML=html;
-  var hdiv=document.getElementById('holidays-list');
-  hdiv.innerHTML=m.holidays.length?m.holidays.map(function(h){
-    return'<div class="card" style="display:flex;align-items:center;gap:10px">'
-      +'<div style="background:var(--border2);border-radius:8px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold);flex-shrink:0">'+h.d+'</div>'
-      +'<div><div style="font-size:13px;font-weight:600;color:var(--text)">'+h.emoji+' '+(h.name[lang]||h.name.ky)+'</div>'
-      +'<div style="font-size:10px;color:var(--text3)">'+(months[curMonth][lang]||months[curMonth].ru)+' '+h.d+'</div>'
-      +'</div></div>';
-  }).join(''):'';
-}
-
-function showDayInfo(d){
-  var m=months[curMonth];
-  var hol=m.holidays.find(function(h){return h.d===d;});
-  var el=document.getElementById('selected-day-info');
-  if(hol){
-    el.style.display='block';
-    el.innerHTML='<div class="gold" style="font-weight:700;font-size:14px">'+hol.emoji+' '+(hol.name[lang]||hol.name.ky)+'</div>'
-      +'<div class="text2" style="font-size:11px;margin-top:4px">'+(m[lang]||m.ru)+' '+d+', '+curYear+'</div>';
-  } else {
-    el.style.display='none';
-  }
-}
-
-function changeMonth(d){
-  curMonth+=d;
-  if(curMonth<0){curMonth=11;curYear--;}
-  if(curMonth>11){curMonth=0;curYear++;}
-  document.getElementById('selected-day-info').style.display='none';
-  renderCalendar();
-}
-
 function renderMuchol(){
-  var grid=document.getElementById('muchol-grid');
-  grid.innerHTML=animals.map(function(a,i){
+  document.getElementById('muchol-grid').innerHTML=animals.map(function(a,i){
     var y=a.years.find(function(yr){return yr>=2020;})||a.years[a.years.length-1];
-    return'<div class="animal-cell '+(i===6?'current':'')+' '+(i===selAnimal?'selected':'')+'" onclick="selectAnimal('+i+')">'
-      +'<div class="animal-emoji">'+a.emoji+'</div>'
-      +'<div class="animal-name">'+(a.name[lang]||a.name.ky)+'</div>'
-      +'<div class="animal-year">'+y+'</div>'
+    return'<div class="animal-cell '+(i===6?'current':'')+(i===selAnimalIdx?' selected':'')+'" onclick="selectAnimal('+i+')">'
+      +'<div style="font-size:24px">'+a.emoji+'</div>'
+      +'<div style="font-size:10px;color:var(--text2);margin-top:3px">'+(a.name[lang]||a.name.ky)+'</div>'
+      +'<div style="font-size:9px;color:var(--gold);font-weight:700">'+y+'</div>'
       +'</div>';
   }).join('');
-  showAnimalDetail(selAnimal);
+  showAnimalDetail(selAnimalIdx);
 }
-
 function selectAnimal(i){
-  selAnimal=i;
+  selAnimalIdx=i;
   document.querySelectorAll('.animal-cell').forEach(function(c,idx){c.classList.toggle('selected',idx===i);});
   showAnimalDetail(i);
 }
-
 function showAnimalDetail(i){
   var a=animals[i];
-  var d=document.getElementById('animal-detail');
   var traitsHtml=(a.traits[lang]||a.traits.ky).map(function(tr){return'<span class="badge">'+tr+'</span>';}).join('');
-  var nearYears=a.years.filter(function(y){return y>=1984;}).join(', ');
-  d.innerHTML='<div class="detail-box">'
+  var ny=a.years.filter(function(y){return y>=1984;}).join(', ');
+  document.getElementById('animal-detail').innerHTML='<div class="detail-box">'
     +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
-    +'<div style="font-size:40px">'+a.emoji+'</div>'
-    +'<div><div class="gold" style="font-size:16px;font-weight:700">'+(a.name[lang]||a.name.ky)+'</div>'
-    +'<div class="text2" style="font-size:11px">'+(a.name[lang==='en'?'ru':lang]||a.name.ru)+'</div></div>'
-    +'</div>'
-    +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">'+traitsHtml+'</div>'
-    +'<div class="gold" style="font-size:11px;font-weight:700;margin-bottom:4px">'+t('prophecy_title')+'</div>'
+    +'<div style="font-size:42px">'+a.emoji+'</div>'
+    +'<div><div class="gold" style="font-size:17px;font-weight:700">'+(a.name[lang]||a.name.ky)+'</div>'
+    +'<div class="text2" style="font-size:12px">'+a.name.ru+'</div></div></div>'
+    +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">'+traitsHtml+'</div>'
+    +'<div class="gold" style="font-size:12px;font-weight:700;margin-bottom:5px">'+t('prophecy_lbl')+'</div>'
     +'<div class="text2" style="font-size:12px;line-height:1.7">'+(a.prophecy[lang]||a.prophecy.ky)+'</div>'
-    +'<div class="text3" style="font-size:10px;margin-top:6px">'+t('years')+': '+nearYears+'</div>'
+    +'<div class="text3" style="font-size:10px;margin-top:8px">'+t('years_lbl')+': '+ny+'</div>'
     +'</div>';
 }
-
 function findAnimal(){
   var year=parseInt(document.getElementById('birth-year').value);
   if(!year||year<1900||year>2040)return;
   var i=((year-4)%12+12)%12;
   var a=animals[i];
-  var r=document.getElementById('animal-result');
-  r.style.display='block';
-  r.innerHTML='<div style="font-size:36px">'+a.emoji+'</div>'
-    +'<div class="gold" style="font-size:14px;font-weight:700;margin-top:6px">'+(a.name[lang]||a.name.ky)+'</div>'
-    +'<div class="text2" style="font-size:11px;margin-top:4px;line-height:1.6">'+(a.prophecy[lang]||a.prophecy.ky)+'</div>';
+  document.getElementById('animal-result').style.display='block';
+  document.getElementById('animal-result').innerHTML='<div style="font-size:40px">'+a.emoji+'</div>'
+    +'<div class="gold" style="font-size:15px;font-weight:700;margin-top:8px">'+(a.name[lang]||a.name.ky)+'</div>'
+    +'<div class="text2" style="font-size:12px;margin-top:6px;line-height:1.6">'+(a.prophecy[lang]||a.prophecy.ky)+'</div>';
   selectAnimal(i);
+  addXP(50);
 }
 
 function filterPersons(el,cat){
@@ -1091,68 +1013,85 @@ function filterPersons(el,cat){
   el.classList.add('active');
   renderPersons();
 }
-
 function searchPersons(v){selPersonSearch=v.toLowerCase();renderPersons();}
-
 function renderPersons(){
   document.getElementById('person-detail').style.display='none';
   var filtered=persons.filter(function(p){
-    var catOk=selPersonCat==='all'||p.cat===selPersonCat;
-    var searchOk=!selPersonSearch||p.name.toLowerCase().includes(selPersonSearch)||(p.role[lang]||p.role.ky).toLowerCase().includes(selPersonSearch);
-    return catOk&&searchOk;
+    return (selPersonCat==='all'||p.cat===selPersonCat)&&
+           (!selPersonSearch||p.name.toLowerCase().includes(selPersonSearch)||(p.role[lang]||p.role.ky).toLowerCase().includes(selPersonSearch));
   });
   document.getElementById('persons-list').innerHTML=filtered.map(function(p){
     return'<div class="person-card" onclick="showPerson('+p.id+')">'
-      +'<div class="avatar" style="overflow:hidden;padding:0;">'
-+(p.img 
-  ? '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentNode.innerHTML=\''+p.name[0]+'\'">'
-  : p.name[0])
-+'</div>'
-      +'<div style="flex:1">'
-      +'<div style="font-weight:700;font-size:14px;color:var(--text)">'+p.name+'</div>'
-      +'<div style="font-size:11px;color:var(--gold);margin-top:2px">'+(p.role[lang]||p.role.ky)+'</div>'
-      +'<div style="font-size:10px;color:var(--text3)">'+(p.period[lang]||p.period.ky)+'</div>'
+      +'<div class="avatar">'
+      +(p.img?'<img src="'+p.img+'">':'')
       +'</div>'
-      +'<div style="color:var(--text3);font-size:20px">›</div>'
-      +'</div>';
+      +'<div style="flex:1"><div style="font-weight:700;font-size:14px;color:var(--text)">'+p.name+'</div>'
+      +'<div style="font-size:11px;color:var(--gold);margin-top:2px">'+(p.role[lang]||p.role.ky)+'</div>'
+      +'<div style="font-size:10px;color:var(--text3)">'+(p.period[lang]||p.period.ky)+'</div></div>'
+      +'<div style="color:var(--text3);font-size:20px">›</div></div>';
   }).join('');
 }
-
 function showPerson(id){
   var p=persons.find(function(x){return x.id===id;});
   var detail=document.getElementById('person-detail');
   detail.style.display='block';
-  var factsHtml=(p.facts||[]).map(function(f){return'<div class="fact-card" style="margin-bottom:4px"><div style="font-size:11px;color:var(--text2)">'+(f[lang]||f.ky)+'</div></div>';}).join('');
+  var factsHtml=(p.facts||[]).map(function(f){
+    return '<div style="font-size:11px;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border2)">⭐ '+(f[lang]||f.ky)+'</div>';
+  }).join('');
   detail.innerHTML=
     '<button class="back-btn" onclick="renderPersons();document.getElementById(\'person-detail\').style.display=\'none\'">'+t('back')+'</button>'
     +'<div style="text-align:center;background:var(--card);border-radius:12px;padding:20px;margin-bottom:10px;border:1px solid var(--border2)">'
-    +'<div style="font-size:56px">'+p.emoji+'</div>'
-    +'<div class="gold" style="font-size:18px;font-weight:700;margin-top:8px">'+p.name+'</div>'
+    +'<div style="width:80px;height:80px;border-radius:50%;overflow:hidden;margin:0 auto;border:3px solid var(--gold2);background:var(--border2)">'
+    +(p.img?'<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover">':'')
+    +'</div>'
+    +'<div class="gold" style="font-size:18px;font-weight:700;margin-top:10px">'+p.name+'</div>'
     +'<div class="text2" style="font-size:11px">'+(p.period[lang]||p.period.ky)+'</div>'
     +'<span class="badge" style="margin-top:6px;display:inline-block">'+(p.role[lang]||p.role.ky)+'</span>'
     +'</div>'
-    +'<div class="card"><div class="gold" style="font-weight:700;margin-bottom:6px;font-size:13px">'+t('biography')+'</div><div class="text2" style="font-size:12px;line-height:1.7">'+(p.bio[lang]||p.bio.ky)+'</div></div>'
-    +p.quotes.map(function(q){return'<div class="quote-card"><div class="text2" style="font-size:12px;font-style:italic;line-height:1.7;padding-left:20px;margin-top:8px">'+(q[lang]||q.ky)+'</div></div>';}).join('')
-    +(factsHtml?'<div style="margin-top:6px">'+factsHtml+'</div>':'');
+    +'<div class="card"><div class="gold" style="font-weight:700;margin-bottom:8px;font-size:13px">'+t('bio_lbl')+'</div>'
+    +'<div class="text2" style="font-size:12px;line-height:1.8">'+(p.bio[lang]||p.bio.ky)+'</div></div>'
+    +p.quotes.map(function(q){
+      return'<div class="quote-card"><div class="text2" style="font-size:12px;line-height:1.7">'+(q[lang]||q.ky)+'</div></div>';
+    }).join('')
+    +(factsHtml?'<div class="card" style="margin-top:4px">'+factsHtml+'</div>':'');
   document.getElementById('persons-list').innerHTML='';
+  addXP(30);
 }
 
 function renderTraditions(){
-  document.getElementById('traditions-list').innerHTML=traditions.map(function(tr){
-    return'<div class="card card-interactive" onclick="showTradition(this,\''+tr.name.ky+'\')" style="margin-bottom:8px">'
-      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
-      +'<div style="font-size:28px">'+tr.emoji+'</div>'
-      +'<div><div class="gold" style="font-size:14px;font-weight:700">'+(tr.name[lang]||tr.name.ky)+'</div>'
-      +'<span class="badge">'+tr.cat+'</span></div></div>'
-      +'<div class="text2" style="font-size:12px;line-height:1.7">'+(tr.desc[lang]||tr.desc.ky)+'</div>'
+  document.getElementById('traditions-list').innerHTML=traditions.map(function(tr,idx){
+    var factsHtml=(tr.facts||[]).map(function(f){
+      return '<div style="font-size:11px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border2)">⭐ '+(f[lang]||f.ky)+'</div>';
+    }).join('');
+    return '<div class="trad-card">'
+      +'<div class="trad-header" onclick="toggleTrad('+idx+')">'
+      +'<div style="font-size:28px;flex-shrink:0">'+tr.emoji+'</div>'
+      +'<div style="flex:1">'
+      +'<div class="gold" style="font-size:14px;font-weight:700">'+(tr.name[lang]||tr.name.ky)+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(tr.short[lang]||tr.short.ky)+'</div>'
+      +'</div>'
+      +'<span class="badge">'+tr.cat+'</span>'
+      +'<span style="color:var(--gold);font-size:18px;margin-left:6px" id="trad-arrow-'+idx+'">›</span>'
+      +'</div>'
+      +'<div class="trad-body" id="trad-body-'+idx+'">'
+      +'<div style="margin-top:10px">'
+      +'<div class="text2" style="font-size:12px;line-height:1.8">'+(tr.desc[lang]||tr.desc.ky)+'</div>'
+      +(factsHtml?'<div style="margin-top:10px;border-top:1px solid var(--border2);padding-top:8px">'+factsHtml+'</div>':'')
+      +'</div></div>'
       +'</div>';
   }).join('');
 }
-
-function showTradition(el,name){
+function toggleTrad(idx){
+  var body=document.getElementById('trad-body-'+idx);
+  var arrow=document.getElementById('trad-arrow-'+idx);
+  var isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  arrow.textContent=isOpen?'›':'↓';
+  if(!isOpen)addXP(15);
 }
 
-renderCalendar();renderMuchol();renderPersons();renderPlaces();renderTraditions();renderQuests();renderHomePersons();updateTodayCard();updateFact();updateXP();
+renderCalendar();renderMuchol();renderPersons();renderPlaces();
+renderTraditions();renderQuests();renderHomePersons();updateTodayCard();updateFact();updateXPBar();
 </script>
 </body>
 </html>
